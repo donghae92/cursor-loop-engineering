@@ -1,0 +1,11 @@
+---
+description: Documentation policy for framework changes
+alwaysApply: true
+---
+
+# Documentation Policy
+
+- Update docs when CLI, hooks, or runtime contracts change.
+- Keep Quick Start accurate and runnable.
+- Prefer examples that execute, not aspirational snippets.
+- Changelog every user-visible change.

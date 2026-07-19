@@ -1,6 +1,6 @@
 # Cursor Loop Engineering
 
-Reusable AI engineering framework for **any** Cursor project. Cursor Loop Engineering installs durable rules, skills, agents, and hooks into your repository, then coordinates verification, regression, repair, and release through a Python CLI and runtime memory under `.cursor-loop/`.
+Reusable AI engineering framework and **first-class Cursor plugin** for **any** Cursor project. Install via project installer or local plugin path (`~/.cursor/plugins/local/`) for `/add-plugin` style discovery—rules, skills, agents, hooks, slash commands, verification, and safe update/rollback.
 
 ## Why use it
 
@@ -32,7 +32,14 @@ python3 -m cursor_loop update --path /path/to/your-project
 python3 -m cursor_loop doctor --path /path/to/your-project --repair
 ```
 
-See [docs/installation.md](docs/installation.md) and [docs/quick-start.md](docs/quick-start.md).
+Install as a Cursor plugin (local):
+
+```bash
+python3 -m cursor_loop plugin-validate --self
+python3 -m cursor_loop plugin-install
+```
+
+See [docs/plugin-installation.md](docs/plugin-installation.md) and [docs/installation.md](docs/installation.md).
 
 ## CLI
 

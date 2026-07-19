@@ -23,6 +23,14 @@ from cursor_loop_install.framework_core import (  # noqa: E402
     rollback,
     update,
 )
+from cursor_loop_install.plugin import (  # noqa: E402
+    doctor_plugin,
+    install_plugin_local,
+    remove_plugin_local,
+    sync_plugin_layout,
+    update_plugin_local,
+    validate_plugin,
+)
 from cursor_loop_install.migration_engine import plan_upgrade  # noqa: E402
 from cursor_loop_install.verify import verify_framework  # noqa: E402
 from cursor_loop_install.versions import read_compatibility, read_framework_version  # noqa: E402
@@ -40,6 +48,8 @@ def _print(data: dict) -> None:
 
 def cmd_bootstrap(args: argparse.Namespace) -> int:
     root = framework_root() if args.self else Path(args.path).resolve()
+    if args.self:
+        sync_plugin_layout(root)
     _print(bootstrap(root))
     return 0
 
@@ -148,6 +158,8 @@ def cmd_rollback(args: argparse.Namespace) -> int:
 def cmd_release(args: argparse.Namespace) -> int:
     root = Path(args.path).resolve()
     memory = MemoryController(root)
+    if (framework_root() / ".cursor-plugin" / "plugin.json").exists():
+        sync_plugin_layout(framework_root())
     verification = verify_framework(root)
     if verification.get("result") != "PASS":
         _print({"result": "FAIL", "reason": "verify failed; release blocked", "verify": verification})
@@ -164,6 +176,42 @@ def cmd_release(args: argparse.Namespace) -> int:
     }
     _print(out)
     return 0
+
+
+def cmd_plugin_validate(args: argparse.Namespace) -> int:
+    root = framework_root() if args.self else Path(args.path).resolve()
+    sync_plugin_layout(root)
+    result = validate_plugin(root)
+    _print(result)
+    return 0 if result.get("result") == "PASS" else 4
+
+
+def cmd_plugin_doctor(args: argparse.Namespace) -> int:
+    root = framework_root() if args.self else Path(args.path).resolve()
+    result = doctor_plugin(root, repair=args.repair)
+    _print(result)
+    return 0 if result.get("result") == "PASS" else 4
+
+
+def cmd_plugin_install(args: argparse.Namespace) -> int:
+    plugins_dir = Path(args.target).resolve() if args.target else None
+    result = install_plugin_local(framework_root(), force=args.force, plugins_dir=plugins_dir)
+    _print(result)
+    return 0 if result.get("result") == "PASS" else 4
+
+
+def cmd_plugin_update(args: argparse.Namespace) -> int:
+    plugins_dir = Path(args.target).resolve() if args.target else None
+    result = update_plugin_local(framework_root(), plugins_dir=plugins_dir)
+    _print(result)
+    return 0 if result.get("result") == "PASS" else 4
+
+
+def cmd_plugin_remove(args: argparse.Namespace) -> int:
+    plugins_dir = Path(args.target).resolve() if args.target else None
+    result = remove_plugin_local(plugins_dir=plugins_dir)
+    _print(result)
+    return 0 if result.get("result") == "PASS" else 4
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -233,6 +281,39 @@ def build_parser() -> argparse.ArgumentParser:
     p_release.add_argument("--path", default=".", help="Project path")
     p_release.add_argument("--output", help="Package output directory")
     p_release.set_defaults(func=cmd_release)
+
+    p_pv = sub.add_parser("plugin-validate", help="Validate Cursor plugin packaging")
+    p_pv.add_argument("--path", default=".", help="Plugin root")
+    p_pv.add_argument("--self", action="store_true", help="Use framework repository root")
+    p_pv.set_defaults(func=cmd_plugin_validate)
+
+    p_pd = sub.add_parser("plugin-doctor", help="Diagnose/repair plugin packaging")
+    p_pd.add_argument("--path", default=".", help="Plugin root")
+    p_pd.add_argument("--self", action="store_true")
+    p_pd.add_argument("--repair", action="store_true")
+    p_pd.set_defaults(func=cmd_plugin_doctor)
+
+    p_pi = sub.add_parser("plugin-install", help="Install plugin into ~/.cursor/plugins/local")
+    p_pi.add_argument("--force", action="store_true")
+    p_pi.add_argument(
+        "--target",
+        help="Override local plugins directory (default: ~/.cursor/plugins/local)",
+    )
+    p_pi.set_defaults(func=cmd_plugin_install)
+
+    p_pu = sub.add_parser("plugin-update", help="Update local Cursor plugin install")
+    p_pu.add_argument(
+        "--target",
+        help="Override local plugins directory (default: ~/.cursor/plugins/local)",
+    )
+    p_pu.set_defaults(func=cmd_plugin_update)
+
+    p_pr = sub.add_parser("plugin-remove", help="Remove local Cursor plugin install")
+    p_pr.add_argument(
+        "--target",
+        help="Override local plugins directory (default: ~/.cursor/plugins/local)",
+    )
+    p_pr.set_defaults(func=cmd_plugin_remove)
     return parser
 
 

@@ -156,6 +156,18 @@ def verify_framework(root: Path) -> dict[str, Any]:
     # optional commands dir is user-owned; just report
     checks["commands"] = "PRESENT" if (root / ".cursor" / "commands").exists() else "ABSENT"
 
+    # Plugin packaging validation when this tree is the framework/plugin source
+    if (root / ".cursor-plugin" / "plugin.json").exists():
+        from .plugin import validate_plugin
+
+        plugin = validate_plugin(root)
+        checks["plugin"] = plugin.get("result", "FAIL")
+        if plugin.get("result") != "PASS":
+            failures.append("plugin validation failed")
+            failures.extend(plugin.get("failures") or [])
+    else:
+        checks["plugin"] = "ABSENT"
+
     result = {
         "result": "PASS" if not failures else "FAIL",
         "failure_count": len(failures),

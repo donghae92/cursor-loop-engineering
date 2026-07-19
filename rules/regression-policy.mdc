@@ -1,0 +1,14 @@
+---
+description: Regression policy with L1–L8 levels and fixed baselines
+alwaysApply: true
+---
+
+# Regression Policy
+
+Every critical change triggers regression.
+
+## Levels
+
+L1 Schema · L2 Hash · L3 Provenance · L4 Semantic · L5 Temporal · L6 Dependency · L7 Representative · L8 Boot
+
+Baselines must include artifact id, version, and hash. No floating baselines.

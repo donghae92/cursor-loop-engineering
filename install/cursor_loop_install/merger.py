@@ -15,32 +15,55 @@ from .versions import ASSET_DIRS, framework_root
 
 def iter_framework_assets(source_root: Path | None = None) -> list[tuple[str, Path]]:
     root = source_root or framework_root()
-    cursor = root / ".cursor"
+    # Prefer plugin-root component dirs; fall back to `.cursor/` for older checkouts
+    plugin_cursor = root / ".cursor"
     assets: list[tuple[str, Path]] = []
-    hooks_json = cursor / "hooks.json"
+
+    hooks_json = root / "hooks" / "hooks.json"
+    legacy_hooks = plugin_cursor / "hooks.json"
     if hooks_json.exists():
+        # Install into target as .cursor/hooks.json with project-relative commands
         assets.append((".cursor/hooks.json", hooks_json))
+    elif legacy_hooks.exists():
+        assets.append((".cursor/hooks.json", legacy_hooks))
+
     for name in ASSET_DIRS:
-        directory = cursor / name
+        directory = root / name if (root / name).exists() else plugin_cursor / name
         if not directory.exists():
             continue
         for path in directory.rglob("*"):
             if path.is_file():
+                # hooks scripts live under hooks/*.py at plugin root
+                if name == "hooks" and path.name == "hooks.json":
+                    continue
                 rel = f".cursor/{name}/{path.relative_to(directory).as_posix()}"
                 assets.append((rel, path))
     return assets
 
 
 def merge_hooks_json(src: Path, dest: Path) -> dict[str, Any]:
-    """Merge hook event lists; preserve unknown user events and duplicate-safe commands."""
+    """Merge hook event lists; rewrite plugin-relative commands to project `.cursor/hooks/`."""
     src_data = json.loads(src.read_text(encoding="utf-8"))
+    # Normalize commands to project-local .cursor/hooks/*
+    normalized_src = {"version": src_data.get("version", 1), "hooks": {}}
+    for event, entries in (src_data.get("hooks") or {}).items():
+        rewritten = []
+        for entry in entries or []:
+            item = dict(entry)
+            command = str(item.get("command") or "")
+            name = Path(command).name
+            if name.endswith(".py"):
+                item["command"] = f".cursor/hooks/{name}"
+            rewritten.append(item)
+        normalized_src["hooks"][event] = rewritten
+
     if dest.exists():
         dest_data = json.loads(dest.read_text(encoding="utf-8"))
     else:
         dest_data = {"version": 1, "hooks": {}}
     merged_hooks = dict(dest_data.get("hooks") or {})
     added = 0
-    for event, entries in (src_data.get("hooks") or {}).items():
+    for event, entries in (normalized_src.get("hooks") or {}).items():
         existing = list(merged_hooks.get(event) or [])
         existing_cmds = {(e.get("command"), e.get("matcher")) for e in existing if isinstance(e, dict)}
         for entry in entries or []:
@@ -51,7 +74,7 @@ def merge_hooks_json(src: Path, dest: Path) -> dict[str, Any]:
                 added += 1
         merged_hooks[event] = existing
     out = {
-        "version": src_data.get("version") or dest_data.get("version") or 1,
+        "version": normalized_src.get("version") or dest_data.get("version") or 1,
         "hooks": merged_hooks,
     }
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -112,12 +135,11 @@ def install_assets(
     for rel, src in assets:
         dest = target / rel
         if rel == ".cursor/hooks.json":
-            if dest.exists() and preserve_custom:
-                merge_hooks_json(src, dest)
+            # Always normalize through merge helper (works for fresh and existing)
+            merge_hooks_json(src, dest)
+            if dest.exists():
                 updated.append(rel)
             else:
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(src, dest)
                 written.append(rel)
             files_meta.append({"path": rel, "sha256": sha256_file(dest), "managed": True})
             continue

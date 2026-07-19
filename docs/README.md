@@ -7,6 +7,8 @@ Welcome to the documentation for **Cursor Loop Engineering** — a reusable AI e
 | Document | Description |
 |----------|-------------|
 | [Quick start](quick-start.md) | Install, bootstrap, verify in five minutes |
+| [Plugin documentation](plugin.md) | Cursor plugin packaging and local install |
+| [Plugin installation](plugin-installation.md) | /add-plugin and project install options |
 | [Installation](installation.md) | Install into any project shape |
 | [Upgrade guide](upgrade-guide.md) | Incremental updates and force refresh |
 | [Migration guide](migration-guide.md) | Upgrade/rollback scripts and history |
