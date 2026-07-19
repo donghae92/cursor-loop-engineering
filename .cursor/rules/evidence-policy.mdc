@@ -1,0 +1,12 @@
+---
+description: Evidence policy — confidence is not evidence
+alwaysApply: true
+---
+
+# Evidence Policy
+
+Model confidence is never evidence.
+
+Cite file paths, hashes, schemas, command outputs, or runtime artifacts.
+Quarantine ambiguous outputs under `.cursor-loop/quarantine/`.
+Use evidence checks before promoting claims.
