@@ -1,12 +1,10 @@
 ---
 name: cle-status
-description: Show Cursor Loop Engineering versions, detection, and runtime status
+description: Show Cursor Loop version, runtime, and loop disposition
 ---
 
-# Status
+# cle-status
 
 ```bash
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop status --path .
+cle status --path .
 ```
-
-Report framework version, installed version, repository kind, open tasks, and upgrade plan.

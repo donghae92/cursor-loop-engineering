@@ -1,11 +1,10 @@
 ---
-description: Independent review policy for derived changes
+description: Independent review expectations
 alwaysApply: true
 ---
 
-# Review Policy
+# Review policy
 
-Reviewers do not author replacement implementations inside a review decision.
-
-Report Critical / Suggestion / Nice-to-have with evidence.
-Confirm validation and regression artifacts exist for the change.
+- Defect-first review: correctness, safety, evidence gaps.
+- Call out incomplete modules and dual sources of truth.
+- Require tests for installer, runtime, and CLI behavior changes.

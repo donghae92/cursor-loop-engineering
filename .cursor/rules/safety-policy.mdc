@@ -1,11 +1,11 @@
 ---
-description: Safety policy for destructive actions and secrets
+description: Safety boundaries for agents and hooks
 alwaysApply: true
 ---
 
-# Safety Policy
+# Safety policy
 
-- Never commit secrets, tokens, or credentials.
-- Ask before destructive irreversible operations outside `.cursor-loop/`.
-- Hooks may deny unsafe shell mutations.
-- Prefer fail-closed for destructive actions.
+- Do not run destructive git commands unless explicitly requested.
+- Do not exfiltrate secrets or write outside the workspace without cause.
+- Hooks may deny unsafe shell patterns; default allow only when policy checks pass.
+- Never modify source-of-truth files outside permitted paths.

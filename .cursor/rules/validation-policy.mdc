@@ -1,11 +1,10 @@
 ---
-description: Validation policy — independent checks and gate failures
+description: Validation gates before promotion
 alwaysApply: true
 ---
 
-# Validation Policy
+# Validation policy
 
-- Workers implement; validators verify independently.
-- Run `python3 -m cursor_loop verify` after infrastructure changes.
-- Gate FAIL starts a repair loop via `cle repair` / `cle loop`.
-- Unknown or skipped mandatory gates block release.
+- Every component validates itself: plugin, installer, runtime controllers, hooks.
+- `cle verify` is the canonical gate; repair then retest until clean.
+- Unknown results are failures for release purposes.

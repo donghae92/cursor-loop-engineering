@@ -37,18 +37,18 @@ jobs:
       - name: Bootstrap and self-install
         shell: bash
         run: |
-          export PYTHONPATH=sdk:runtime:install
+          export PYTHONPATH=sdk:runtime
           python -m cursor_loop bootstrap --self
           python -m cursor_loop install . --force
 
       - name: Pytest
         shell: bash
-        run: PYTHONPATH=sdk:runtime:install pytest -q
+        run: PYTHONPATH=sdk:runtime pytest -q
 
       - name: Verify
         shell: bash
-        run: PYTHONPATH=sdk:runtime:install python -m cursor_loop verify --path .
+        run: PYTHONPATH=sdk:runtime python -m cursor_loop verify --path .
 
       - name: Doctor
         shell: bash
-        run: PYTHONPATH=sdk:runtime:install python -m cursor_loop doctor --path .
+        run: PYTHONPATH=sdk:runtime python -m cursor_loop doctor --path .

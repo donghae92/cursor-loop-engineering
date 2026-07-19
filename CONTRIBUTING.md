@@ -30,7 +30,7 @@ pytest
 | Area | Location | Notes |
 |------|----------|-------|
 | CLI commands | `sdk/cursor_loop/cli.py` | JSON stdout, explicit exit codes |
-| Install logic | `install/install.py` | Asset copy + manifest hashes |
+| Install logic | `sdk/cursor_loop_install/` | Asset copy + manifest hashes |
 | Runtime controllers | `runtime/cursor_loop_runtime/` | Use atomic JSON writes |
 | Cursor rules | `.cursor/rules/*.mdc` | Front matter + policy content |
 | Skills | `.cursor/skills/<name>/SKILL.md` | Runnable commands, no placeholders |

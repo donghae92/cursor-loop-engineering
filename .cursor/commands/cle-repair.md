@@ -1,14 +1,12 @@
 ---
 name: cle-repair
-description: Diagnose and repair a Cursor Loop Engineering installation
+description: Repair missing Cursor Loop assets and re-verify
 ---
 
-# Repair
+# cle-repair
 
 ```bash
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop doctor --path . --repair
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop repair --path .
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop verify --path .
+cle doctor --path . --repair
+cle repair --path .
+cle verify --path .
 ```
-
-Preserve custom `.cursor` files. Backups live under `.cursor-loop/backups/`.

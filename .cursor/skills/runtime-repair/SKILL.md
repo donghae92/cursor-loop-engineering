@@ -1,13 +1,31 @@
 ---
 name: runtime-repair
-description: Diagnoses degraded Cursor Loop runtime and repairs install/runtime artifacts. Use when working with Cursor Loop Engineering runtime repair.
+description: Diagnose and repair degraded runtime
 ---
 
 # Runtime Repair
 
-1. `python3 -m cursor_loop status`
-2. `python3 -m cursor_loop doctor`
-3. `python3 -m cursor_loop repair`
-4. Re-run `python3 -m cursor_loop verify`
+## When to use
 
-Stop on SAFE_STOP / MANUAL_REVIEW or when source mutation outside the project is required.
+Use when doctor reports missing assets or DEGRADED health.
+
+## Procedure
+
+1. `cle doctor --repair`
+2. `cle repair`
+3. `cle verify`
+
+## Acceptance criteria
+
+- doctor issues empty or repaired
+- health HEALTHY
+
+## Evidence
+
+doctor JSON + verify JSON
+
+## Stop conditions
+
+- Identical failure without progress → SAFE_STOP
+- Missing authority or ambiguous ownership → MANUAL_REVIEW
+- Gate PASS with durable artifacts recorded under `.cursor-loop/`

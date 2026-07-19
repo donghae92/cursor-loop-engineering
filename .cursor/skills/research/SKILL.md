@@ -1,8 +1,31 @@
 ---
 name: research
-description: Read-only research across docs, runtime state, and repository structure. Use when working with Cursor Loop Engineering research.
+description: Research repository evidence before mutation
 ---
 
 # Research
 
-Read `docs/`, `.cursor/`, and `.cursor-loop/`. Return citations. No mutations.
+## When to use
+
+Use before non-trivial changes.
+
+## Procedure
+
+1. Search and cite paths.
+2. Separate observation vs interpretation.
+3. Only then propose minimal change.
+
+## Acceptance criteria
+
+- citations include paths
+- no fabricated artifacts
+
+## Evidence
+
+Notes in decision_history or PR body
+
+## Stop conditions
+
+- Identical failure without progress → SAFE_STOP
+- Missing authority or ambiguous ownership → MANUAL_REVIEW
+- Gate PASS with durable artifacts recorded under `.cursor-loop/`

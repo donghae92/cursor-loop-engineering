@@ -1,11 +1,10 @@
 ---
-description: Release policy — verify must pass before packaging
+description: Release gates and packaging rules
 alwaysApply: true
 ---
 
-# Release Policy
+# Release policy
 
-Release requires `cle verify` PASS, healthy runtime state, and a release checkpoint.
-
-Do not release with failed, unknown, or skipped mandatory gates.
-Compiler/release agents must not invent new reasoning content.
+- Release only when verify PASS and regression PASS.
+- Export packages must include `.cursor/`, `runtime/`, `sdk/`, docs, and VERSION.
+- Never release while a mandatory gate is failed, unknown, or skipped.

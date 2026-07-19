@@ -24,9 +24,9 @@ def test_record_rejects_confidence_evidence(isolated_project: Path) -> None:
 def test_record_accepts_file_evidence(isolated_project: Path) -> None:
     controller = EvidenceController(isolated_project)
 
-    record = controller.record("FILE_HASH", ".cursor/hooks.json", "hooks present")
+    record = controller.record("HASH", ".cursor/hooks.json", "hooks present")
 
-    assert record["evidence_class"] == "FILE_HASH"
+    assert record["evidence_class"] == "HASH"
     rows = read_jsonl(controller.memory.paths.evidence_log)
     assert len(rows) == 1
     assert rows[0]["evidence_id"] == record["evidence_id"]

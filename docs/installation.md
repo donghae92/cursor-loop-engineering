@@ -1,36 +1,34 @@
-# Installation Guide
+# Installation
 
-## Install into an existing project
-
-```bash
-git clone https://github.com/donghae92/cursor-loop-engineering.git
-cd cursor-loop-engineering
-pip install -e ".[dev]"
-
-python -m cursor_loop install /path/to/your/project
-python -m cursor_loop verify --path /path/to/your/project
-```
-
-## Install into an empty repository
+## Into any project
 
 ```bash
-mkdir my-app && cd my-app
-python -m cursor_loop install .
-python -m cursor_loop bootstrap --path .
-python -m cursor_loop verify --path .
+pip install -e /path/to/cursor-loop-engineering
+cle install /path/to/your-project
+cle verify --path /path/to/your-project
 ```
 
-## Install from a GitHub Release
+The installer:
+
+1. Detects empty / existing / monorepo layouts
+2. Copies canonical assets from the framework `.cursor/` tree
+3. Merges `hooks.json` without discarding custom entries
+4. Writes backups under `.cursor-loop/backups/` before overwrites
+5. Records `install_manifest.json` with file hashes
+
+No manual `.cursor/` edits are required for a standard install.
+
+## Self bootstrap (this repository)
 
 ```bash
-python -m cursor_loop import cursor-loop-engineering-1.1.0.tar.gz --target /path/to/project
-python -m cursor_loop verify --path /path/to/project
+cle bootstrap --self
+cle verify
 ```
 
-## What gets installed
+## Update / repair / remove
 
-- `.cursor/rules`, `skills`, `agents`, `hooks`, `templates`, `examples`
-- `.cursor/hooks.json` (merged if already present)
-- `.cursor-loop/` runtime memory and install manifest
-
-Custom files you already have under `.cursor/` are preserved.
+```bash
+cle update --path /path/to/project
+cle doctor --path /path/to/project --repair
+cle remove --path /path/to/project
+```

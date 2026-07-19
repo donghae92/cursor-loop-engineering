@@ -1,13 +1,11 @@
 ---
 name: cle-loop
-description: Advance or inspect the Cursor Loop Engineering failed-section loop
+description: Advance the failed-section engineering loop once
 ---
 
-# Loop
+# cle-loop
 
 ```bash
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop loop --status
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop loop --once
+cle loop --once --path .
+cle loop --status --path .
 ```
-
-Continue only while disposition is CONTINUE and measurable progress exists. Otherwise SAFE_STOP or MANUAL_REVIEW.

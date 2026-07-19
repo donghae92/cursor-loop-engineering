@@ -1,41 +1,32 @@
-# Cursor Loop Engineering — Marketplace Description
+# Marketplace description
 
-**Cursor Loop Engineering** is a first-class Cursor plugin that installs a complete AI engineering harness into any project.
+**Cursor Loop Engineering** is a production Cursor engineering framework for any repository.
 
-## What it provides
+## Highlights
 
-- **Rules** — Architecture, validation, regression, evidence, loop, safety, and release policies
-- **Skills** — Runtime repair, verification, research, release, scheduling, and more
-- **Agents** — CEO, Manager, Planner, Researcher, Developer, Reviewer, QA, Regression, Release, Documentation
-- **Hooks** — Pre/post task, loop continue, stop, failure, research, and validation lifecycle hooks
-- **Slash commands** — `/cle-verify`, `/cle-status`, `/cle-repair`, `/cle-loop`, `/cle-install`, `/cle-update`
-- **Installer** — Merge-safe install/update/remove with backups and migrations
+- Merge-safe install into empty, existing, and monorepo projects
+- Canonical `.cursor/` rules, skills, agents, hooks, and slash commands
+- Runtime controllers for loop, scheduler, regression L1–L8, and evidence
+- Local plugin install under `~/.cursor/plugins/local/`
 
 ## Install
 
-### As a Cursor plugin (local)
-
 ```bash
-python -m cursor_loop plugin-install
+pip install -e .
+cle plugin-validate --self
+cle plugin-install
 ```
 
-Then open Cursor Plugins / Marketplace and enable **Cursor Loop Engineering** from local plugins (`~/.cursor/plugins/local/cursor-loop-engineering`).
-
-### Into a project workspace
+Or project install:
 
 ```bash
-python -m cursor_loop install /path/to/project
-python -m cursor_loop verify --path /path/to/project
+cle install /path/to/project
+cle verify --path /path/to/project
 ```
 
-No manual file editing required.
+## Requirements
 
-## Compatibility
+- Python 3.9+ (3.11 recommended)
+- Cursor IDE with hooks/plugins support
 
-- Cursor plugin manifest: `.cursor-plugin/plugin.json`
-- Python 3.9+
-- Works with empty repos, existing projects, and monorepos
-
-## Keywords
-
-cursor-plugin, engineering-loop, rules, skills, agents, hooks, verification, regression, installer
+Generic framework only — no proprietary project adapters.

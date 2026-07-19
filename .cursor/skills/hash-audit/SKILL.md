@@ -1,9 +1,30 @@
 ---
 name: hash-audit
-description: Audits install manifest hashes against on-disk Cursor assets. Use when working with Cursor Loop Engineering hash audit.
+description: Audit managed file hashes
 ---
 
 # Hash Audit
 
-Regression L2 compares `.cursor-loop/install_manifest.json` hashes.
-On mismatch, run `python3 -m cursor_loop update` then verify.
+## When to use
+
+Use when L2 hash failures occur.
+
+## Procedure
+
+1. Read install_manifest.json.
+2. Recompute sha256 for listed paths.
+3. Update only via installer after backup.
+
+## Acceptance criteria
+
+- mismatches listed precisely
+
+## Evidence
+
+manifest + sha256 digests
+
+## Stop conditions
+
+- Identical failure without progress → SAFE_STOP
+- Missing authority or ambiguous ownership → MANUAL_REVIEW
+- Gate PASS with durable artifacts recorded under `.cursor-loop/`

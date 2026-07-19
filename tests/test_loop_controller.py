@@ -85,6 +85,8 @@ def test_run_once_reads_last_verify(isolated_project: Path) -> None:
     assert out["verification_result"] == "FAIL"
     assert out["loop_state"]["last_result"] == "FAIL"
     assert out["loop_state"]["disposition"] == Disposition.CONTINUE.value
+    assert out["localization"]["primary_section"]
+    assert out["repair"] is not None
 
 
 def test_fingerprint_failure_is_stable(isolated_project: Path) -> None:

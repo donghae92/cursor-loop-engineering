@@ -1,51 +1,25 @@
-# Plugin Installation Guide
+# Plugin installation
 
-## Option A — Local Cursor plugin
-
-From this repository:
+## Local `/add-plugin` style install
 
 ```bash
-pip install -e ".[dev]"
-python -m cursor_loop plugin-validate --self
-python -m cursor_loop plugin-install
-# optional: install into a custom local-plugins directory
-python -m cursor_loop plugin-install --target /path/to/plugins/local
+cle plugin-validate --self
+cle plugin-install
+# optional custom directory
+cle plugin-install --target /path/to/plugins/local
 ```
 
-Cursor discovers the plugin under:
+Destination:
 
 `~/.cursor/plugins/local/cursor-loop-engineering`
 
-Enable it from Cursor’s Plugins / Marketplace UI.
+Then enable the plugin in Cursor.
 
-Upgrade later:
-
-```bash
-python -m cursor_loop plugin-update
-```
-
-Rollback the local plugin by restoring the backup directory created next to the install, or reinstall a previous release tag.
-
-## Option B — Install into a project (no plugin UI required)
+## Project install (recommended for repos)
 
 ```bash
-python -m cursor_loop install /path/to/your/project
-python -m cursor_loop verify --path /path/to/your/project
+cle install /path/to/project
+cle verify --path /path/to/project
 ```
 
-This copies rules/skills/agents/hooks/commands into the project’s `.cursor/` with merge-safe backups.
-
-## Option C — GitHub Release archive
-
-```bash
-python -m cursor_loop export --output dist
-python -m cursor_loop import dist/cursor-loop-engineering-1.2.0.tar.gz --target /path/to/project
-```
-
-## Verification
-
-```bash
-python -m cursor_loop plugin-validate --self
-python -m cursor_loop verify --path .
-python -m cursor_loop doctor --path . --repair
-```
+This writes assets into the project's `.cursor/` tree with merge-safe backups.

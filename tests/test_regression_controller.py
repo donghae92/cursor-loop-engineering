@@ -50,6 +50,13 @@ def test_run_passes_with_minimal_hooks(isolated_project: Path) -> None:
 
     assert record["result"] == "PASS"
     assert record["levels"]["L1_SCHEMA"] == "PASS"
+    assert record["levels"]["L2_HASH"] == "PASS"
+    assert record["levels"]["L3_PROVENANCE"] == "PASS"
+    assert record["levels"]["L4_SEMANTIC"] == "PASS"
+    assert record["levels"]["L5_TEMPORAL"] == "PASS"
+    assert record["levels"]["L6_DEPENDENCY"] == "PASS"
+    assert record["levels"]["L7_REPRESENTATIVE"] == "PASS"
+    assert record["levels"]["L8_BOOT"] == "PASS"
     assert record["failure_count"] == 0
     history = read_jsonl(controller.memory.paths.regression_history)
     assert len(history) == 1

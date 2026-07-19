@@ -1,19 +1,20 @@
 ---
 name: cle-install
-description: Install Cursor Loop Engineering into the current project without manual edits
+description: Install Cursor Loop Engineering into a project or as a local plugin
 ---
 
-# Install
+# cle-install
 
-Install merge-safe Cursor assets into this project:
+Project install (merge-safe, no manual edits):
 
 ```bash
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop install .
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop verify --path .
+cle install /path/to/project
+cle verify --path /path/to/project
 ```
 
-To install as a local Cursor plugin for `/add-plugin` style usage:
+Local Cursor plugin:
 
 ```bash
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop plugin-install
+cle plugin-validate --self
+cle plugin-install
 ```

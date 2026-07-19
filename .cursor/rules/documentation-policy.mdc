@@ -1,11 +1,10 @@
 ---
-description: Documentation policy for framework changes
+description: Documentation must match shipped behavior
 alwaysApply: true
 ---
 
-# Documentation Policy
+# Documentation policy
 
-- Update docs when CLI, hooks, or runtime contracts change.
-- Keep Quick Start accurate and runnable.
-- Prefer examples that execute, not aspirational snippets.
-- Changelog every user-visible change.
+- Docs describe only implemented behavior.
+- When behavior changes, update README, docs/, and CHANGELOG in the same change set.
+- Examples must be runnable without proprietary dependencies.

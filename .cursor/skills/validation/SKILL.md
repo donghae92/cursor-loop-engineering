@@ -1,13 +1,31 @@
 ---
 name: validation
-description: Runs framework verification and interprets gate failures. Use when working with Cursor Loop Engineering validation.
+description: Run and interpret validation gates
 ---
 
 # Validation
 
-```bash
-python3 -m cursor_loop verify
-python3 -m cursor_loop doctor
-```
+## When to use
 
-Workers must not self-approve. Cite `last_verify.json`.
+Use when checking whether the framework installation is healthy.
+
+## Procedure
+
+1. `cle verify --path .`
+2. Inspect failures JSON.
+3. `cle doctor --repair` then re-verify.
+
+## Acceptance criteria
+
+- verify result PASS
+- failures list empty
+
+## Evidence
+
+`last_verify.json` and doctor report.
+
+## Stop conditions
+
+- Identical failure without progress → SAFE_STOP
+- Missing authority or ambiguous ownership → MANUAL_REVIEW
+- Gate PASS with durable artifacts recorded under `.cursor-loop/`

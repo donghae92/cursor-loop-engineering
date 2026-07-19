@@ -1,20 +1,16 @@
 ---
 name: cle-verify
-description: Run Cursor Loop Engineering verification on the current project
+description: Verify Cursor Loop Engineering installation and gates
 ---
 
-# Verify
+# cle-verify
 
-Run the framework verifier and report PASS/FAIL with concrete failures.
-
-```bash
-PYTHONPATH=sdk:runtime:install python3 -m cursor_loop verify --path .
-```
-
-If the CLI is installed:
+Run the canonical verification gate.
 
 ```bash
 cle verify --path .
+# or
+python3 -m cursor_loop verify --path .
 ```
 
-On FAIL, run `/cle-repair` or `cle doctor --repair`.
+Expect JSON with `"result": "PASS"` and an empty `failures` list.

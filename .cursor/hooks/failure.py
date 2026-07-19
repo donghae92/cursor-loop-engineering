@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
-import json, sys
+from __future__ import annotations
+
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _common import append_event, emit, read_payload  # noqa: E402
+
+
 def main() -> int:
-    raw = sys.stdin.read() or "{}"
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError:
-        payload = {}
-    events = Path.cwd() / ".cursor-loop" / "events.jsonl"
-    events.parent.mkdir(parents=True, exist_ok=True)
-    with events.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps({
-            "event_type": "TOOL_FAILURE",
-            "payload_keys": sorted(list(payload.keys())),
-        }) + "\n")
-    print(json.dumps({
-        "additional_context": "Cursor Loop failure hook recorded an event. Consider `python3 -m cursor_loop doctor`."
-    }))
-    return 0
+    payload = read_payload()
+    message = str(payload.get("message") or payload.get("error") or "failure event")
+    append_event(f"failure: {message}")
+    return emit(
+        "allow",
+        "Cursor Loop failure hook: localize section, cle doctor --repair, cle loop --once, then cle verify.",
+        failure=message,
+    )
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

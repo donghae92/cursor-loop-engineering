@@ -1,9 +1,30 @@
 ---
 name: report
-description: Writes structured reports from runtime status and verification artifacts. Use when working with Cursor Loop Engineering report.
+description: Produce structured status reports
 ---
 
 # Report
 
-Gather `status`, `last_verify.json`, regression history, and decisions.
-Write JSON under `docs/` or project reports directory with evidence paths.
+## When to use
+
+Use when summarizing framework health for humans.
+
+## Procedure
+
+1. `cle status`
+2. Include version, detection, loop disposition, last verify.
+3. Do not claim PASS without JSON evidence.
+
+## Acceptance criteria
+
+- report references concrete artifacts
+
+## Evidence
+
+status JSON
+
+## Stop conditions
+
+- Identical failure without progress → SAFE_STOP
+- Missing authority or ambiguous ownership → MANUAL_REVIEW
+- Gate PASS with durable artifacts recorded under `.cursor-loop/`

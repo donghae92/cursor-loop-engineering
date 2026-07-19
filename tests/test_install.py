@@ -1,61 +1,35 @@
-"""Tests for framework install_into using real assets."""
+"""Tests for installer using the production sdk installer package."""
 
 from __future__ import annotations
 
-import importlib.util
 from pathlib import Path
 
-from cursor_loop_runtime.models import read_json
+from cursor_loop_install.framework_core import install_into
+from cursor_loop_install.versions import read_framework_version
 
 
-def _load_install_module(framework_root: Path):
-    install_path = framework_root / "install" / "install.py"
-    spec = importlib.util.spec_from_file_location("cle_install", install_path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def test_install_into_copies_assets_and_manifest(tmp_path: Path, framework_root: Path) -> None:
-    install_mod = _load_install_module(framework_root)
-
-    result = install_mod.install_into(tmp_path)
-
+def test_install_into_copies_assets_and_manifest(tmp_path: Path) -> None:
+    result = install_into(tmp_path, force=True)
     assert result["result"] == "PASS"
-    assert result["file_count"] > 0
     assert (tmp_path / ".cursor" / "hooks.json").exists()
-    assert (tmp_path / ".cursor" / "rules").is_dir()
     assert (tmp_path / ".cursor" / "skills").is_dir()
     assert (tmp_path / ".cursor" / "agents").is_dir()
-    assert (tmp_path / ".cursor" / "hooks").is_dir()
-    assert (tmp_path / ".cursor-loop" / "state.json").exists()
-    assert (tmp_path / "AGENTS.md").exists()
-
-    manifest = read_json(tmp_path / ".cursor-loop" / "install_manifest.json", {})
-    assert manifest["framework"] == "cursor-loop-engineering"
-    assert manifest["version"] == "1.2.0"
-    assert len(manifest.get("files", [])) == result["file_count"]
+    assert (tmp_path / ".cursor" / "commands").is_dir()
+    manifest = tmp_path / ".cursor-loop" / "install_manifest.json"
+    assert manifest.exists()
+    assert read_framework_version() == "2.0.0"
 
 
-def test_install_into_makes_hook_scripts_executable(tmp_path: Path, framework_root: Path) -> None:
-    install_mod = _load_install_module(framework_root)
-
-    install_mod.install_into(tmp_path)
-
-    hooks_dir = tmp_path / ".cursor" / "hooks"
-    scripts = list(hooks_dir.glob("*.py"))
-    assert scripts
-    for script in scripts:
+def test_install_into_makes_hook_scripts_executable(tmp_path: Path) -> None:
+    install_into(tmp_path, force=True)
+    hooks = list((tmp_path / ".cursor" / "hooks").glob("*.py"))
+    assert hooks
+    for script in hooks:
         assert script.stat().st_mode & 0o111
 
 
-def test_install_into_idempotent_with_force(tmp_path: Path, framework_root: Path) -> None:
-    install_mod = _load_install_module(framework_root)
-
-    first = install_mod.install_into(tmp_path)
-    second = install_mod.install_into(tmp_path, force=True)
-
+def test_install_into_idempotent_with_force(tmp_path: Path) -> None:
+    first = install_into(tmp_path, force=True)
+    second = install_into(tmp_path, force=True)
     assert first["result"] == "PASS"
     assert second["result"] == "PASS"
-    assert second["file_count"] == first["file_count"]

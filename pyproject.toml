@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cursor-loop-engineering"
-version = "1.2.0"
+version = "2.0.0"
 description = "Reusable AI engineering framework for any Cursor project"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -12,7 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Cursor Loop Engineering Contributors" }]
 keywords = ["cursor", "ai", "engineering", "agents", "hooks", "skills"]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
@@ -37,11 +37,11 @@ Documentation = "https://github.com/donghae92/cursor-loop-engineering/blob/main/
 Repository = "https://github.com/donghae92/cursor-loop-engineering"
 
 [tool.setuptools.packages.find]
-where = ["sdk", "runtime", "install"]
+where = ["sdk", "runtime"]
 
 [tool.setuptools.package-data]
 cursor_loop = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["sdk", "runtime", "install"]
+pythonpath = ["sdk", "runtime"]

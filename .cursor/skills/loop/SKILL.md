@@ -1,13 +1,31 @@
 ---
 name: loop
-description: Advances the failed-section engineering loop. Use when working with Cursor Loop Engineering loop.
+description: Advance the failed-section engineering loop
 ---
 
 # Loop
 
-```bash
-python3 -m cursor_loop loop --once
-python3 -m cursor_loop loop --status
-```
+## When to use
 
-Use Cursor `/loop` for recurring ticks while disposition is CONTINUE.
+Use after a gate failure to localize, repair, and retest.
+
+## Procedure
+
+1. Read `last_verify.json`.
+2. `cle loop --once`.
+3. Re-run verify; respect SAFE_STOP / MANUAL_REVIEW.
+
+## Acceptance criteria
+
+- localization recorded
+- disposition is IDLE/CONTINUE/SAFE_STOP/MANUAL_REVIEW
+
+## Evidence
+
+loop_state.json + decision_history.jsonl
+
+## Stop conditions
+
+- Identical failure without progress → SAFE_STOP
+- Missing authority or ambiguous ownership → MANUAL_REVIEW
+- Gate PASS with durable artifacts recorded under `.cursor-loop/`

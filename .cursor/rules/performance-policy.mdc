@@ -1,11 +1,10 @@
 ---
-description: Performance policy for loops, hooks, and verification
+description: Performance budgets for verification loops
 alwaysApply: true
 ---
 
-# Performance Policy
+# Performance policy
 
-- Keep hooks fast; avoid heavy work on every keystroke.
-- Record timings in `.cursor-loop/performance.json`.
-- Cap expensive scans; prefer incremental checks.
-- Optimize for short agent sessions with durable memory.
+- Prefer deterministic local checks over network calls.
+- Record timings under `.cursor-loop/performance.json`.
+- Keep verify/regress loops suitable for short agent sessions.

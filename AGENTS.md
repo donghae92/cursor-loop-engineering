@@ -1,14 +1,26 @@
 # AGENTS.md
 
-This project uses **Cursor Loop Engineering**.
+This repository is **Cursor Loop Engineering** — a generic Cursor engineering framework.
+
+## Authority
+
+1. `.cursor/rules/`
+2. `.cursor/skills/`
+3. Runtime controllers in `runtime/cursor_loop_runtime/`
+4. CLI: `cle` / `python3 -m cursor_loop`
 
 ## Quick commands
 
 ```bash
-python3 -m cursor_loop status
-python3 -m cursor_loop verify
-python3 -m cursor_loop loop --once
+cle status
+cle verify
+cle loop --once
+cle doctor --repair
 ```
 
-Runtime memory lives in `.cursor-loop/`.
-Cursor assets live in `.cursor/`.
+## Boundaries
+
+- Cursor assets: `.cursor/` only
+- Runtime memory: `.cursor-loop/` only
+- Python packages: `runtime/` and `sdk/`
+- No project-specific or proprietary product logic in this framework

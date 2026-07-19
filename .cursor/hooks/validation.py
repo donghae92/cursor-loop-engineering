@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
-import json, sys
+from __future__ import annotations
+
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _common import deny_if_unsafe, emit, read_payload  # noqa: E402
+
+
 def main() -> int:
-    _ = sys.stdin.read()
-    verify = Path.cwd() / ".cursor-loop" / "last_verify.json"
-    msg = "Cursor Loop validation: run `python3 -m cursor_loop verify`."
-    if verify.exists():
-        data = json.loads(verify.read_text(encoding="utf-8"))
-        msg = f"Last verify result={data.get('result')} failures={data.get('failure_count')}"
-    print(json.dumps({"additional_context": msg}))
-    return 0
+    payload = read_payload()
+    denied = deny_if_unsafe(payload)
+    if denied:
+        return emit("deny", f"Cursor Loop validation blocked: {denied}")
+    return emit(
+        "allow",
+        "Cursor Loop validation: require durable artifacts; model confidence is not evidence.",
+    )
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

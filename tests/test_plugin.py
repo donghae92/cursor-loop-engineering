@@ -27,25 +27,30 @@ def test_sync_and_validate_plugin(framework_root: Path) -> None:
     assert result["counts"]["commands"] >= 6
     assert result["counts"]["hooks"] >= 7
     assert (framework_root / ".cursor-plugin" / "plugin.json").exists()
+    assert (framework_root / ".cursor" / "rules").exists()
     assert (framework_root / "mcp.json").exists()
 
 
-def test_plugin_doctor_repair(framework_root: Path, tmp_path: Path, monkeypatch) -> None:
-    # Use a temporary copy of plugin essentials
+def test_plugin_doctor_repair(tmp_path: Path, monkeypatch) -> None:
     plugin = tmp_path / "plugin"
     plugin.mkdir()
-    # minimal broken plugin
     (plugin / ".cursor-plugin").mkdir()
     (plugin / ".cursor-plugin" / "plugin.json").write_text(
-        json.dumps({"name": "cursor-loop-engineering", "version": "1.2.0", "description": "test"}),
+        json.dumps({"name": "cursor-loop-engineering", "version": "2.0.0", "description": "test"}),
         encoding="utf-8",
     )
-    # seed a fake .cursor so sync can populate
+    (plugin / "VERSION").write_text("2.0.0\n", encoding="utf-8")
     cursor = plugin / ".cursor"
     (cursor / "rules").mkdir(parents=True)
-    (cursor / "rules" / "architecture.mdc").write_text("---\ndescription: x\nalwaysApply: true\n---\n# A\n", encoding="utf-8")
+    (cursor / "rules" / "architecture.mdc").write_text(
+        "---\ndescription: x\nalwaysApply: true\n---\n# A\n",
+        encoding="utf-8",
+    )
     (cursor / "skills" / "validation").mkdir(parents=True)
-    (cursor / "skills" / "validation" / "SKILL.md").write_text("---\nname: validation\ndescription: d\n---\n# V\n", encoding="utf-8")
+    (cursor / "skills" / "validation" / "SKILL.md").write_text(
+        "---\nname: validation\ndescription: d\n---\n# V\n",
+        encoding="utf-8",
+    )
     (cursor / "agents").mkdir(parents=True)
     (cursor / "agents" / "ceo.md").write_text("---\nname: ceo\ndescription: d\n---\n# C\n", encoding="utf-8")
     (cursor / "hooks").mkdir(parents=True)
@@ -56,12 +61,9 @@ def test_plugin_doctor_repair(framework_root: Path, tmp_path: Path, monkeypatch)
     )
 
     monkeypatch.setattr("cursor_loop_install.plugin.framework_root", lambda: plugin)
-    # doctor repair should sync + seed commands/mcp
     result = doctor_plugin(plugin, repair=True)
-    assert (plugin / "rules").exists()
     assert (plugin / "mcp.json").exists()
-    assert (plugin / "commands").exists()
-    # May still fail inventory thresholds; ensure repair attempted
+    assert (plugin / ".cursor" / "commands").exists()
     assert result["repairs"]
 
 

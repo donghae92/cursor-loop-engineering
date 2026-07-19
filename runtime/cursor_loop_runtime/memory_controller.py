@@ -29,11 +29,19 @@ class MemoryController:
         if not self.paths.loop_state.exists():
             write_json_atomic(self.paths.loop_state, LoopState().to_dict())
         if not self.paths.state.exists():
+            version = "0.0.0"
+            version_file = self.paths.root / "VERSION"
+            if version_file.exists():
+                version = version_file.read_text(encoding="utf-8").strip()
+            else:
+                manifest = self.paths.manifest
+                if manifest.exists():
+                    version = str(read_json(manifest, {}).get("framework_version") or "0.0.0")
             write_json_atomic(
                 self.paths.state,
                 {
                     "framework": "cursor-loop-engineering",
-                    "version": "1.0.0",
+                    "version": version,
                     "phase": "BOOTSTRAPPED",
                     "health": "HEALTHY",
                     "updated_at": utcnow(),

@@ -3,48 +3,33 @@
   "hooks": {
     "preToolUse": [
       {
-        "command": ".cursor/hooks/pre_task.py",
-        "matcher": "Shell|Task",
-        "timeout": 15
+        "command": ".cursor/hooks/pre_task.py"
+      },
+      {
+        "command": ".cursor/hooks/validation.py"
       }
     ],
     "postToolUse": [
       {
-        "command": ".cursor/hooks/post_task.py",
-        "matcher": "Shell|Task|Write",
-        "timeout": 15
+        "command": ".cursor/hooks/post_task.py"
       }
     ],
-    "postToolUseFailure": [
+    "onError": [
       {
-        "command": ".cursor/hooks/failure.py",
-        "timeout": 15
+        "command": ".cursor/hooks/failure.py"
       }
     ],
     "stop": [
       {
-        "command": ".cursor/hooks/stop.py",
-        "timeout": 15,
-        "loop_limit": 3
-      }
-    ],
-    "subagentStop": [
-      {
-        "command": ".cursor/hooks/loop_continue.py",
-        "timeout": 15,
-        "loop_limit": 5
-      }
-    ],
-    "beforeSubmitPrompt": [
-      {
-        "command": ".cursor/hooks/research.py",
-        "matcher": "UserPromptSubmit",
-        "timeout": 10
+        "command": ".cursor/hooks/stop.py"
       },
       {
-        "command": ".cursor/hooks/validation.py",
-        "matcher": "UserPromptSubmit",
-        "timeout": 10
+        "command": ".cursor/hooks/loop_continue.py"
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/research.py"
       }
     ]
   }

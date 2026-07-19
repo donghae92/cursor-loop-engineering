@@ -1,12 +1,11 @@
 ---
-description: Failed-section loop limits and stop dispositions
+description: Failed-section loop, retries, and stop dispositions
 alwaysApply: true
 ---
 
-# Loop Policy
+# Loop policy
 
-Failed gate → localize → repair → re-validate → re-regress → recompute disposition.
-
-Continue only while a concrete failure, corrective action, new evidence, retry budget, and measurable progress exist.
-
-Otherwise stop with SAFE_STOP or MANUAL_REVIEW.
+- On gate failure: localize → repair → retest → continue or stop.
+- Identical failure fingerprint ≥ 3 → SAFE_STOP.
+- Retry budget exhausted → MANUAL_REVIEW.
+- Never continue an identical failure loop without measurable progress.

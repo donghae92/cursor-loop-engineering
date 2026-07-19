@@ -1,32 +1,26 @@
-# Migration Guide
+# Migration guide
 
-Migrations live in `migration/` and are registered in `migration/registry.json`.
+Migrations live in `sdk/migrations/` and are registered in `sdk/migrations/registry.json`.
 
-## Apply upgrades
-
-```bash
-python -m cursor_loop update --path /path/to/project
-```
-
-Or install a newer package; migrations run automatically when the installed version differs.
-
-## Roll back
+## Apply
 
 ```bash
-python -m cursor_loop rollback --path /path/to/project
-python -m cursor_loop rollback --path /path/to/project --migration-id v1_0_0__v1_1_0
+cle update --path /path/to/project
+# or explicitly
+cle rollback --path /path/to/project   # after a recorded upgrade
 ```
 
-## History
+## Author a migration
 
-Migration events are appended to:
-
-`.cursor-loop/migration_history.jsonl`
-
-## Authoring a migration
-
-1. Create `migration/vX_Y_Z__vA_B_C/`
+1. Create `sdk/migrations/vX_Y_Z__vA_B_C/`
 2. Add `upgrade.py` with `upgrade(target, framework_root=None)`
 3. Add `rollback.py` with `rollback(target, framework_root=None)`
-4. Register both paths in `migration/registry.json`
-5. Bump `VERSION` and update `COMPATIBILITY.json`
+4. Register both paths in `sdk/migrations/registry.json`
+
+## 2.0.0 notes
+
+Breaking layout changes:
+
+- Canonical assets: `.cursor/` only
+- Installer package: `sdk/cursor_loop_install/`
+- Migrations: `sdk/migrations/`

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from cursor_loop_runtime.memory_controller import MemoryController
 from cursor_loop_runtime.models import TaskStatus, read_json
-from cursor_loop_runtime.scheduler import DEFAULT_TASKS, Scheduler
+from cursor_loop_runtime.scheduler import DEFAULT_TASK_SPECS, Scheduler
 
 
 def test_run_seeds_default_tasks(isolated_project: Path) -> None:
@@ -18,9 +18,9 @@ def test_run_seeds_default_tasks(isolated_project: Path) -> None:
 
     assert result["result"] == "PASS"
     task_ids = {task.task_id for task in scheduler.queue.list_tasks()}
-    for default in DEFAULT_TASKS:
-        assert default.task_id in task_ids
-    assert result["summary"]["total"] == len(DEFAULT_TASKS)
+    for spec in DEFAULT_TASK_SPECS:
+        assert spec["task_id"] in task_ids
+    assert result["summary"]["total"] == len(DEFAULT_TASK_SPECS)
 
 
 def test_run_updates_t0001_done_when_cursor_and_runtime_ready(isolated_project: Path) -> None:
@@ -33,6 +33,7 @@ def test_run_updates_t0001_done_when_cursor_and_runtime_ready(isolated_project: 
     assert tasks["T0001"].status == TaskStatus.DONE.value
     assert tasks["T0002"].status == TaskStatus.READY.value
     assert tasks["T0003"].status == TaskStatus.WAITING.value
+    assert tasks["T0004"].status == TaskStatus.WAITING.value
 
 
 def test_run_marks_t0002_done_when_verify_artifact_exists(isolated_project: Path) -> None:
@@ -51,6 +52,7 @@ def test_run_marks_t0002_done_when_verify_artifact_exists(isolated_project: Path
     assert tasks["T0001"].status == TaskStatus.DONE.value
     assert tasks["T0002"].status == TaskStatus.DONE.value
     assert tasks["T0003"].status == TaskStatus.READY.value
+    assert tasks["T0004"].status == TaskStatus.WAITING.value
 
 
 def test_run_increments_schedule_runs(isolated_project: Path) -> None:

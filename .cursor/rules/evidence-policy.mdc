@@ -1,12 +1,11 @@
 ---
-description: Evidence policy — confidence is not evidence
+description: Evidence requirements and confidence rejection
 alwaysApply: true
 ---
 
-# Evidence Policy
+# Evidence policy
 
-Model confidence is never evidence.
-
-Cite file paths, hashes, schemas, command outputs, or runtime artifacts.
-Quarantine ambiguous outputs under `.cursor-loop/quarantine/`.
-Use evidence checks before promoting claims.
+- Model confidence is never evidence.
+- Accepted classes: FILE, HASH, TEST_RESULT, LOG, MANIFEST, CHECKPOINT, COMMAND_OUTPUT, SCHEMA.
+- Claims must point at durable artifacts under the project or `.cursor-loop/`.
+- Quarantine malformed derived outputs; do not silently rewrite history.

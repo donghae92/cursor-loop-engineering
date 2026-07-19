@@ -32,7 +32,7 @@ jobs:
 
       - name: Test and verify
         run: |
-          export PYTHONPATH=sdk:runtime:install
+          export PYTHONPATH=sdk:runtime
           python -m cursor_loop bootstrap --self
           python -m cursor_loop install . --force
           pytest -q
@@ -41,7 +41,7 @@ jobs:
       - name: Export release package
         id: export
         run: |
-          export PYTHONPATH=sdk:runtime:install
+          export PYTHONPATH=sdk:runtime
           python -m cursor_loop export --output dist | tee export.json
           echo "archive=$(python -c 'import json; print(json.load(open(\"export.json\"))[\"archive\"])')" >> "$GITHUB_OUTPUT"
           echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"

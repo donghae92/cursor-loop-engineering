@@ -1,45 +1,48 @@
 # Cursor Loop Engineering
 
-Reusable AI engineering framework and **first-class Cursor plugin** for **any** Cursor project. Install via project installer or local plugin path (`~/.cursor/plugins/local/`) for `/add-plugin` style discovery—rules, skills, agents, hooks, slash commands, verification, and safe update/rollback.
+Production-ready, **generic** Cursor engineering framework for any repository.
 
-## Why use it
+Install merge-safe `.cursor/` assets and a durable `.cursor-loop/` runtime. Coordinate verification, regression (L1–L8), repair, and release through a Python CLI—without project-specific or proprietary logic.
 
-- **Portable** — Install into Android, Python, Node, Rust, Flutter, or any other stack.
-- **Evidence-first** — Gates, hashes, and regression levels block release on unknown or failed checks.
-- **Loop-aware** — Failed sections drive localized repair with retry budgets and safe stop dispositions.
-- **Cursor-native** — Assets live in `.cursor/`; agents and hooks integrate with Cursor's agent runtime.
+## Repository structure
+
+```text
+.cursor/          # Canonical Cursor assets (rules, skills, agents, hooks, commands)
+runtime/          # Loop, scheduler, regression, evidence, memory controllers
+sdk/              # CLI + installer + migrations
+docs/             # Framework documentation
+examples/         # Generic stack install examples
+tests/            # Automated verification
+scripts/          # Entrypoints (cle, install helper)
+.github/          # CI and release workflows
+```
 
 ## Quick start
 
 ```bash
 git clone https://github.com/donghae92/cursor-loop-engineering.git
 cd cursor-loop-engineering
-
-# Editable install (recommended for development)
 pip install -e ".[dev]"
 
-# Or run without install
-./scripts/cle bootstrap --self
-./scripts/cle verify
+cle bootstrap --self
+cle verify
 ```
 
-Install into another project:
+Install into another project (no manual edits):
 
 ```bash
-python3 -m cursor_loop install /path/to/your-project
-python3 -m cursor_loop verify --path /path/to/your-project
-python3 -m cursor_loop update --path /path/to/your-project
-python3 -m cursor_loop doctor --path /path/to/your-project --repair
+cle install /path/to/your-project
+cle verify --path /path/to/your-project
+cle update --path /path/to/your-project
+cle doctor --path /path/to/your-project --repair
 ```
 
-Install as a Cursor plugin (local):
+Install as a local Cursor plugin:
 
 ```bash
-python3 -m cursor_loop plugin-validate --self
-python3 -m cursor_loop plugin-install
+cle plugin-validate --self
+cle plugin-install
 ```
-
-See [docs/plugin-installation.md](docs/plugin-installation.md) and [docs/installation.md](docs/installation.md).
 
 ## CLI
 
@@ -47,107 +50,32 @@ See [docs/plugin-installation.md](docs/plugin-installation.md) and [docs/install
 |---------|---------|
 | `install [target]` | Merge-safe install into empty/existing/monorepo projects |
 | `bootstrap [--path \| --self]` | Initialize `.cursor-loop/` runtime memory |
-| `verify [--path]` | Check rules, skills, agents, hooks, runtime, regression, evidence, memory |
-| `doctor [--path] [--repair]` | Diagnose and optionally repair installation |
-| `loop [--status \| --once]` | Advance or inspect the engineering loop |
-| `status [--path]` | Show versions, detection, runtime, upgrade plan |
-| `update [--path] [--force]` | Incremental update preserving customizations |
-| `repair [--path]` | Repair missing assets and re-verify |
-| `remove [--path] [--purge-runtime]` | Remove managed framework assets |
-| `export [--output]` | Package framework for GitHub Releases |
-| `import ARCHIVE [--target]` | Install from a release archive |
-| `rollback [--migration-id]` | Roll back the last migration |
-| `release [--path]` | Verify, checkpoint, and export release assets |
+| `verify [--path]` | Rules, skills, agents, hooks, runtime, regression L1–L8, evidence |
+| `doctor [--path] [--repair]` | Diagnose and optionally repair |
+| `loop [--status \| --once]` | Localize → repair → retest loop |
+| `status [--path]` | Versions, detection, runtime, upgrade plan |
+| `update` / `repair` / `remove` | Lifecycle management |
+| `export` / `import` / `rollback` / `release` | Packaging and migrations |
+| `plugin-validate` / `plugin-install` / `plugin-update` / `plugin-remove` | Local plugin lifecycle |
 
-Invocation options (equivalent after install):
-
-```bash
-python3 -m cursor_loop <command>
-./scripts/cle <command>
-cle <command>   # after pip install -e .
-```
-
-All commands emit JSON to stdout and use exit codes: `0` success, `3` loop stop disposition, `4` gate failure, `5` unexpected error.
+Exit codes: `0` success, `3` loop stop disposition, `4` gate failure, `5` unexpected error.
 
 ## Features
 
-### Layered architecture
-
-Rules → Skills → Agents → Hooks → Runtime Controllers → CLI
-
-Each layer has a clear boundary. Derived state is written only under `.cursor-loop/`. Installable Cursor assets live under `.cursor/`.
-
-### Runtime memory (`.cursor-loop/`)
-
-| File | Role |
-|------|------|
-| `state.json` | Framework health and phase |
-| `loop_state.json` | Loop iteration, disposition, retry budget |
-| `performance.json` | Timing aggregates for validate/regress |
-| `task_queue.jsonl` / `backlog.jsonl` | Scheduled work |
-| `regression_history.jsonl` | Regression run records |
-| `decision_history.jsonl` | Gate and loop decisions |
-| `evidence_log.jsonl` | Evidence checks |
-| `events.jsonl` | Structured event log |
-| `install_manifest.json` | Installed asset hashes |
-| `checkpoints/` | Release and bootstrap checkpoints |
-| `quarantine/` | Ambiguous outputs pending review |
-
-### Cursor assets (`.cursor/`)
-
-| Directory | Contents |
-|-----------|----------|
-| `rules/` | Always-on and scoped policies (`.mdc`) |
-| `skills/` | Task workflows (`SKILL.md` per skill) |
-| `agents/` | Role definitions for subagents |
-| `hooks/` | Python hook scripts + `hooks.json` |
-| `templates/` | Loop and task JSON templates |
-| `examples/` | In-repo usage examples |
-
-### Built-in agents
-
-`ceo`, `manager`, `planner`, `researcher`, `developer`, `reviewer`, `qa`, `regression`, `release`, `documentation`
-
-### Regression levels
-
-L1 schema through L8 boot (extensible via `RegressionController`). Baselines include artifact id, version, and hash — no floating baselines.
-
-## Repository structure
-
-```
-cursor-loop-engineering/
-├── .cursor/                 # Framework Cursor assets (copied on install)
-├── .cursor-loop/            # Runtime memory (created by bootstrap; gitignored in targets)
-├── docs/                    # Documentation
-├── examples/                # Per-stack install guides
-├── install/                 # Install module
-├── runtime/
-│   └── cursor_loop_runtime/ # Controllers (loop, memory, regression, …)
-├── sdk/
-│   └── cursor_loop/         # CLI entrypoint
-├── scripts/
-│   └── cle                  # Convenience launcher
-├── pyproject.toml
-└── tests/                   # pytest suite
-```
+- **Generic only** — no proprietary or product-specific logic
+- **Evidence-first** — confidence is never evidence; claims need durable artifacts
+- **Regression L1–L8** — schema, hash, provenance, semantic, temporal, dependency, representative, boot
+- **Loop-aware** — failed sections localize, attempt deterministic repair, then continue or stop
+- **Cursor-native** — assets under `.cursor/`; optional local plugin materialization for `/add-plugin`
 
 ## Documentation
 
-- [Documentation index](docs/README.md)
-- [Quick start](docs/quick-start.md)
+- [docs/README.md](docs/README.md)
 - [Installation](docs/installation.md)
 - [Architecture](docs/architecture.md)
-- [Loop engineering guide](docs/loop-engineering-guide.md)
-- [Examples by stack](docs/examples.md)
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). By participating, you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
-
-## Security
-
-Report vulnerabilities per [SECURITY.md](SECURITY.md).
+- [Plugin installation](docs/plugin-installation.md)
+- [Compatibility](docs/compatibility-guide.md)
 
 ## License
 
-[MIT](LICENSE) — see [CHANGELOG.md](CHANGELOG.md) for release history.
+MIT
