@@ -1,0 +1,11 @@
+---
+description: Independent review policy for derived changes
+alwaysApply: true
+---
+
+# Review Policy
+
+Reviewers do not author replacement implementations inside a review decision.
+
+Report Critical / Suggestion / Nice-to-have with evidence.
+Confirm validation and regression artifacts exist for the change.
