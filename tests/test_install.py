@@ -34,7 +34,7 @@ def test_install_into_copies_assets_and_manifest(tmp_path: Path, framework_root:
 
     manifest = read_json(tmp_path / ".cursor-loop" / "install_manifest.json", {})
     assert manifest["framework"] == "cursor-loop-engineering"
-    assert manifest["version"] == "1.0.0"
+    assert manifest["version"] == "1.1.0"
     assert len(manifest.get("files", [])) == result["file_count"]
 
 

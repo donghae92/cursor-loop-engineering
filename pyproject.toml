@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cursor-loop-engineering"
-version = "1.0.0"
+version = "1.1.0"
 description = "Reusable AI engineering framework for any Cursor project"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -32,16 +32,16 @@ dev = ["pytest>=7.0"]
 cle = "cursor_loop.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/example/cursor-loop-engineering"
-Documentation = "https://github.com/example/cursor-loop-engineering/blob/main/docs/README.md"
-Repository = "https://github.com/example/cursor-loop-engineering"
+Homepage = "https://github.com/donghae92/cursor-loop-engineering"
+Documentation = "https://github.com/donghae92/cursor-loop-engineering/blob/main/docs/README.md"
+Repository = "https://github.com/donghae92/cursor-loop-engineering"
 
 [tool.setuptools.packages.find]
-where = ["sdk", "runtime"]
+where = ["sdk", "runtime", "install"]
 
 [tool.setuptools.package-data]
 cursor_loop = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["sdk", "runtime"]
+pythonpath = ["sdk", "runtime", "install"]

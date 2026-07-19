@@ -7,7 +7,11 @@ Welcome to the documentation for **Cursor Loop Engineering** — a reusable AI e
 | Document | Description |
 |----------|-------------|
 | [Quick start](quick-start.md) | Install, bootstrap, verify in five minutes |
-| [Installation](installation.md) | pip install, path setup, CI integration |
+| [Installation](installation.md) | Install into any project shape |
+| [Upgrade guide](upgrade-guide.md) | Incremental updates and force refresh |
+| [Migration guide](migration-guide.md) | Upgrade/rollback scripts and history |
+| [Compatibility guide](compatibility-guide.md) | Version matrix and project shapes |
+| [Troubleshooting](troubleshooting.md) | Common failures and repairs |
 | [Architecture](architecture.md) | Layers, controllers, runtime memory |
 
 ## Authoring guides
@@ -35,11 +39,15 @@ All commands accept `--path` (default: current directory) unless noted.
 python3 -m cursor_loop install [target]
 python3 -m cursor_loop bootstrap [--self]
 python3 -m cursor_loop verify
-python3 -m cursor_loop doctor
+python3 -m cursor_loop doctor [--repair]
 python3 -m cursor_loop loop [--status | --once]
 python3 -m cursor_loop status
-python3 -m cursor_loop update
+python3 -m cursor_loop update [--force]
 python3 -m cursor_loop repair
+python3 -m cursor_loop remove [--purge-runtime]
+python3 -m cursor_loop export [--output dist]
+python3 -m cursor_loop import ARCHIVE [--target PATH]
+python3 -m cursor_loop rollback [--migration-id ID]
 python3 -m cursor_loop release
 ```
 
@@ -58,6 +66,8 @@ cle <command>   # after pip install -e .
 | `.cursor-loop/` | Derived runtime memory (JSON / JSONL) |
 | `sdk/cursor_loop/` | CLI package |
 | `runtime/cursor_loop_runtime/` | Controllers |
+| `install/cursor_loop_install/` | Installer / migration / export |
+| `migration/` | Version upgrade and rollback scripts |
 | `install/install.py` | Asset copy and manifest |
 
 ## Policies (in-repo)

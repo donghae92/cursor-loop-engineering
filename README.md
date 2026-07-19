@@ -12,11 +12,11 @@ Reusable AI engineering framework for **any** Cursor project. Cursor Loop Engine
 ## Quick start
 
 ```bash
-git clone https://github.com/your-org/cursor-loop-engineering.git
+git clone https://github.com/donghae92/cursor-loop-engineering.git
 cd cursor-loop-engineering
 
 # Editable install (recommended for development)
-pip install -e .
+pip install -e ".[dev]"
 
 # Or run without install
 ./scripts/cle bootstrap --self
@@ -27,27 +27,30 @@ Install into another project:
 
 ```bash
 python3 -m cursor_loop install /path/to/your-project
-cd /path/to/your-project
-python3 -m cursor_loop bootstrap
-python3 -m cursor_loop verify
-python3 -m cursor_loop status
+python3 -m cursor_loop verify --path /path/to/your-project
+python3 -m cursor_loop update --path /path/to/your-project
+python3 -m cursor_loop doctor --path /path/to/your-project --repair
 ```
 
-See [docs/quick-start.md](docs/quick-start.md) for the full walkthrough.
+See [docs/installation.md](docs/installation.md) and [docs/quick-start.md](docs/quick-start.md).
 
 ## CLI
 
 | Command | Purpose |
 |---------|---------|
-| `install [target]` | Copy framework Cursor assets into a project |
+| `install [target]` | Merge-safe install into empty/existing/monorepo projects |
 | `bootstrap [--path \| --self]` | Initialize `.cursor-loop/` runtime memory |
-| `verify [--path]` | Check infrastructure, rules, skills, agents, hooks, regression |
-| `doctor [--path]` | Environment and installation diagnostics |
+| `verify [--path]` | Check rules, skills, agents, hooks, runtime, regression, evidence, memory |
+| `doctor [--path] [--repair]` | Diagnose and optionally repair installation |
 | `loop [--status \| --once]` | Advance or inspect the engineering loop |
-| `status [--path]` | Show runtime state, schedule, checkpoints, events |
-| `update [--path]` | Reinstall framework assets (force merge) |
-| `repair [--path]` | Fix hooks permissions, recreate runtime, re-verify |
-| `release [--path]` | Create release checkpoint after verify PASS |
+| `status [--path]` | Show versions, detection, runtime, upgrade plan |
+| `update [--path] [--force]` | Incremental update preserving customizations |
+| `repair [--path]` | Repair missing assets and re-verify |
+| `remove [--path] [--purge-runtime]` | Remove managed framework assets |
+| `export [--output]` | Package framework for GitHub Releases |
+| `import ARCHIVE [--target]` | Install from a release archive |
+| `rollback [--migration-id]` | Roll back the last migration |
+| `release [--path]` | Verify, checkpoint, and export release assets |
 
 Invocation options (equivalent after install):
 

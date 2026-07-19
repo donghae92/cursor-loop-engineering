@@ -16,7 +16,8 @@ def ensure_sys_path() -> Path:
     root = framework_root()
     runtime = root / "runtime"
     sdk = root / "sdk"
-    for path in (str(runtime), str(sdk)):
+    install = root / "install"
+    for path in (str(runtime), str(sdk), str(install)):
         if path not in sys.path:
             sys.path.insert(0, path)
     return root
