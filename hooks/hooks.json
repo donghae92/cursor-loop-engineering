@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "./hooks/pre_task.py",
+        "timeout": 10
+      },
+      {
+        "command": "./hooks/validation.py",
+        "timeout": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "./hooks/post_task.py",
+        "timeout": 10
+      }
+    ],
+    "onError": [
+      {
+        "command": "./hooks/failure.py",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "./hooks/stop.py",
+        "timeout": 5
+      },
+      {
+        "command": "./hooks/loop_continue.py",
+        "timeout": 5
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "./hooks/research.py",
+        "timeout": 5
+      }
+    ]
+  }
+}

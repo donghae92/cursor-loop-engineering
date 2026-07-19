@@ -1,0 +1,11 @@
+---
+description: Mandatory regression levels L1–L8
+alwaysApply: true
+---
+
+# Regression policy
+
+Levels: L1 schema, L2 hash, L3 provenance, L4 semantic, L5 temporal, L6 dependency, L7 representative, L8 boot.
+
+- A failed or skipped mandatory level blocks release.
+- Do not mark levels PASS without running their checks.

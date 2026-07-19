@@ -48,5 +48,5 @@ def compare_semver(a: str, b: str) -> int:
     return 0
 
 
-ASSET_DIRS = ("rules", "skills", "agents", "hooks", "commands", "templates", "examples")
+ASSET_DIRS = ("rules", "skills", "agents", "hooks", "commands", "templates")
 MANAGED_MARKER = "cursor-loop-engineering"

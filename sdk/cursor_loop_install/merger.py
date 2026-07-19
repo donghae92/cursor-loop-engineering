@@ -1,6 +1,7 @@
 """Merge-safe asset installation — never overwrite without backup.
 
-Canonical source of Cursor assets is `.cursor/` in the framework repository.
+Plugin convention source: root `rules/`, `skills/`, `agents/`, `commands/`, `hooks/`.
+Project install target: always `.cursor/` in the consumer project.
 """
 
 from __future__ import annotations
@@ -16,19 +17,31 @@ from .backup import backup_paths
 from .versions import ASSET_DIRS, framework_root
 
 
+def _component_dir(root: Path, name: str) -> Path | None:
+    """Prefer conventional root dirs; fall back to `.cursor/`."""
+    conventional = root / name
+    if conventional.exists():
+        return conventional
+    legacy = root / ".cursor" / name
+    if legacy.exists():
+        return legacy
+    return None
+
+
 def iter_framework_assets(source_root: Path | None = None) -> list[tuple[str, Path]]:
-    """Yield (destination_relative_path, source_path) pairs from `.cursor/` only."""
+    """Yield (destination_relative_path, source_path) pairs for project `.cursor/` install."""
     root = source_root or framework_root()
-    cursor = root / ".cursor"
     assets: list[tuple[str, Path]] = []
 
-    hooks_json = cursor / "hooks.json"
+    hooks_json = root / "hooks" / "hooks.json"
+    if not hooks_json.exists():
+        hooks_json = root / ".cursor" / "hooks.json"
     if hooks_json.exists():
         assets.append((".cursor/hooks.json", hooks_json))
 
     for name in ASSET_DIRS:
-        directory = cursor / name
-        if not directory.exists():
+        directory = _component_dir(root, name)
+        if directory is None:
             continue
         for path in directory.rglob("*"):
             if path.is_file():
@@ -40,7 +53,7 @@ def iter_framework_assets(source_root: Path | None = None) -> list[tuple[str, Pa
 
 
 def merge_hooks_json(src: Path, dest: Path) -> dict[str, Any]:
-    """Merge hook event lists; normalize commands to `.cursor/hooks/`."""
+    """Merge hook event lists; normalize commands to project `.cursor/hooks/`."""
     src_data = json.loads(src.read_text(encoding="utf-8"))
     normalized_src: dict[str, Any] = {"version": src_data.get("version", 1), "hooks": {}}
     for event, entries in (src_data.get("hooks") or {}).items():
@@ -124,7 +137,7 @@ def install_assets(
         backup_meta = backup_paths(target, to_backup, reason=reason)
         backed_up = list(backup_meta.get("files") or [])
 
-    _ = preserve_custom  # reserved: custom files outside asset set are never written here
+    _ = preserve_custom
 
     for rel, src in assets:
         dest = target / rel

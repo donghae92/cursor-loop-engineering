@@ -15,17 +15,15 @@
 
 ### Changed
 
+- Migrated plugin packaging to Cursor conventional root dirs (`rules/`, `skills/`, `agents/`, `commands/`, `hooks/`) while retaining `.cursor/` as the project-install mirror.
 - Installer moved to `sdk/cursor_loop_install/`; migrations to `sdk/migrations/`.
-- Plugin local install materializes root component dirs from `.cursor/` at install time only.
-- Removed committed root mirrors (`rules/`, `skills/`, `agents/`, `hooks/`, `commands/`, `templates/`).
-- Removed obsolete `scripts/generate_cursor_assets.py` dual source of truth.
+- Plugin local install copies the conventional tree; `plugin-validate` expects layout `convention`.
 - Hook entries declare timeouts; SECURITY and CONTRIBUTING aligned to 2.0.x.
-- Version status: Production/Stable / Release Candidate.
 
 ### Removed
 
-- Dual-maintained plugin-root asset trees from the source repository.
-- Empty `runtime/data/` and obsolete install package path.
+- Obsolete `scripts/generate_cursor_assets.py` dual generator source.
+- Empty `runtime/data/` and top-level `install/` package path.
 
 ## [1.2.0] - 2026-07-19
 

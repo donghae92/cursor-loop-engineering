@@ -1,4 +1,4 @@
-"""Cursor plugin packaging — `.cursor/` is canonical; local install materializes plugin layout."""
+"""Cursor plugin packaging — conventional root component dirs with `.cursor/` project mirror."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from .versions import framework_root, read_framework_version
 PLUGIN_NAME = "cursor-loop-engineering"
 NAME_PATTERN = re.compile(r"^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$")
 REQUIRED_MANIFEST_FIELDS = ("name", "version", "description")
-CURSOR_COMPONENT_DIRS = ("rules", "skills", "agents", "commands", "hooks", "templates")
+PLUGIN_COMPONENT_DIRS = ("rules", "skills", "agents", "commands", "hooks", "templates")
 
 
 def plugin_root(root: Path | None = None) -> Path:
@@ -37,34 +37,113 @@ def load_manifest(root: Path | None = None) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _copy_tree(src: Path, dest: Path) -> None:
+    if dest.exists():
+        shutil.rmtree(dest)
+    shutil.copytree(src, dest)
+
+
+def _rewrite_hooks_json(data: dict[str, Any], *, plugin_style: bool) -> dict[str, Any]:
+    out: dict[str, Any] = {"version": data.get("version", 1), "hooks": {}}
+    for event, entries in (data.get("hooks") or {}).items():
+        rewritten = []
+        for entry in entries or []:
+            item = dict(entry)
+            command = str(item.get("command") or "")
+            if command:
+                name = Path(command).name
+                item["command"] = f"./hooks/{name}" if plugin_style else f".cursor/hooks/{name}"
+            rewritten.append(item)
+        out["hooks"][event] = rewritten
+    return out
+
+
 def sync_plugin_layout(root: Path | None = None) -> dict[str, Any]:
-    """Ensure plugin manifest points at `.cursor/` components (canonical source)."""
+    """Keep conventional root plugin dirs and `.cursor/` project mirror in sync.
+
+    Canonical plugin source (Cursor convention): root `rules/`, `skills/`, `agents/`,
+    `commands/`, `hooks/hooks.json`.
+
+    Project-install mirror: `.cursor/` (used by the merge-safe installer).
+    """
     root = plugin_root(root)
     cursor = root / ".cursor"
-    checked: list[str] = []
-    for name in CURSOR_COMPONENT_DIRS:
-        path = cursor / name
-        if path.exists():
-            checked.append(name)
+    copied: list[str] = []
+
+    # Prefer existing root components; if missing, seed from .cursor once.
+    for name in ("rules", "skills", "agents", "commands", "templates"):
+        root_dir = root / name
+        cursor_dir = cursor / name
+        if not root_dir.exists() and cursor_dir.exists():
+            _copy_tree(cursor_dir, root_dir)
+            copied.append(f"seed-root:{name}")
+        if root_dir.exists():
+            cursor_dir.parent.mkdir(parents=True, exist_ok=True)
+            _copy_tree(root_dir, cursor_dir)
+            copied.append(f"mirror-cursor:{name}")
+
+    # Hooks
+    root_hooks = root / "hooks"
+    cursor_hooks = cursor / "hooks"
+    root_hooks.mkdir(parents=True, exist_ok=True)
+    cursor_hooks.mkdir(parents=True, exist_ok=True)
+
+    # Seed root hooks from .cursor if needed
+    if not any(root_hooks.glob("*.py")) and cursor_hooks.exists():
+        for script in cursor_hooks.glob("*.py"):
+            target = root_hooks / script.name
+            shutil.copy2(script, target)
+            target.chmod(target.stat().st_mode | 0o111)
+            copied.append(f"seed-root:hooks/{script.name}")
+
+    # Mirror scripts both ways preferring root
+    if any(root_hooks.glob("*.py")):
+        for script in root_hooks.glob("*.py"):
+            target = cursor_hooks / script.name
+            shutil.copy2(script, target)
+            target.chmod(target.stat().st_mode | 0o111)
+            copied.append(f"mirror-cursor:hooks/{script.name}")
+
+    # hooks.json: prefer root/hooks/hooks.json, else .cursor/hooks.json
+    root_hooks_json = root_hooks / "hooks.json"
+    cursor_hooks_json = cursor / "hooks.json"
+    if root_hooks_json.exists():
+        data = json.loads(root_hooks_json.read_text(encoding="utf-8"))
+    elif cursor_hooks_json.exists():
+        data = json.loads(cursor_hooks_json.read_text(encoding="utf-8"))
+    else:
+        data = {"version": 1, "hooks": {}}
+
+    write_json_atomic(root_hooks_json, _rewrite_hooks_json(data, plugin_style=True))
+    write_json_atomic(cursor_hooks_json, _rewrite_hooks_json(data, plugin_style=False))
+    copied.append("hooks.json")
 
     manifest_file = root / ".cursor-plugin" / "plugin.json"
     if manifest_file.exists():
         data = json.loads(manifest_file.read_text(encoding="utf-8"))
-        data["rules"] = "./.cursor/rules/"
-        data["skills"] = "./.cursor/skills/"
-        data["agents"] = "./.cursor/agents/"
-        data["commands"] = "./.cursor/commands/"
-        data["hooks"] = "./.cursor/hooks.json"
+        data["rules"] = "./rules/"
+        data["skills"] = "./skills/"
+        data["agents"] = "./agents/"
+        data["commands"] = "./commands/"
+        data["hooks"] = "./hooks/hooks.json"
         data["mcpServers"] = "./mcp.json"
+        if (root / "assets" / "logo.svg").exists():
+            data["logo"] = "assets/logo.svg"
         write_json_atomic(manifest_file, data)
-        checked.append("plugin.json")
+        copied.append("plugin.json")
 
     mcp = root / "mcp.json"
     if not mcp.exists():
         write_json_atomic(mcp, {"mcpServers": {}})
-        checked.append("mcp.json")
+        copied.append("mcp.json")
 
-    return {"result": "PASS", "checked": checked, "synced_at": utcnow(), "canonical": ".cursor"}
+    return {
+        "result": "PASS",
+        "copied": copied,
+        "synced_at": utcnow(),
+        "canonical": "root-plugin-dirs",
+        "project_mirror": ".cursor/",
+    }
 
 
 def validate_plugin(root: Path | None = None) -> dict[str, Any]:
@@ -90,7 +169,9 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
     name = str(manifest.get("name") or "")
     if name and not NAME_PATTERN.match(name):
         failures.append(f"invalid plugin name: {name}")
-    checks["manifest"] = "PASS" if not failures else "FAIL"
+    checks["manifest"] = "PASS" if not any(
+        item.startswith("manifest missing") or item.startswith("invalid plugin name") for item in failures
+    ) else "FAIL"
 
     version_file = root / "VERSION"
     if version_file.exists():
@@ -104,37 +185,32 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
         failures.append("VERSION file missing")
         checks["version"] = "FAIL"
 
-    # Support source layout (.cursor/*) and materialized marketplace layout (root rules/skills/...).
-    cursor = root / ".cursor"
-    materialized = (root / "rules").exists() or (root / "skills").exists()
-    if materialized:
+    # Conventional layout first; accept materialized/legacy `.cursor` as fallback.
+    if (root / "rules").exists() or (root / "skills").exists():
         rules_dir = root / "rules"
         skills_dir = root / "skills"
         agents_dir = root / "agents"
         commands_dir = root / "commands"
         hooks_dir = root / "hooks"
         hooks_json = root / "hooks" / "hooks.json"
-        layout = "materialized"
+        layout = "convention"
     else:
+        cursor = root / ".cursor"
         rules_dir = cursor / "rules"
         skills_dir = cursor / "skills"
         agents_dir = cursor / "agents"
         commands_dir = cursor / "commands"
         hooks_dir = cursor / "hooks"
         hooks_json = cursor / "hooks.json"
-        layout = "source"
+        layout = "legacy-cursor"
 
     counts = {
         "rules": len(list(rules_dir.glob("*.mdc"))) if rules_dir.exists() else 0,
         "skills": len(list(skills_dir.glob("*/SKILL.md"))) if skills_dir.exists() else 0,
         "agents": len(list(agents_dir.glob("*.md"))) if agents_dir.exists() else 0,
         "commands": len(list(commands_dir.glob("*.md"))) if commands_dir.exists() else 0,
-        "hooks": len([p for p in hooks_dir.glob("*.py") if p.name != "_common.py"]) if hooks_dir.exists() else 0,
+        "hooks": len(list(hooks_dir.glob("*.py"))) if hooks_dir.exists() else 0,
     }
-    # Include helper modules in hook inventory but do not require them for the minimum.
-    if hooks_dir.exists():
-        counts["hooks"] = len(list(hooks_dir.glob("*.py")))
-
     for key, minimum in (("rules", 1), ("skills", 1), ("agents", 1), ("commands", 1), ("hooks", 1)):
         if counts[key] < minimum:
             failures.append(f"insufficient {key}: {counts[key]} < {minimum}")
@@ -143,11 +219,41 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
             checks[key] = "PASS"
 
     if not hooks_json.exists():
-        failures.append("missing hooks.json" if materialized else "missing .cursor/hooks.json")
+        failures.append("missing hooks/hooks.json" if layout == "convention" else "missing .cursor/hooks.json")
         checks["hooks_json"] = "FAIL"
     else:
         checks["hooks_json"] = "PASS"
-    checks["layout"] = layout
+        # Convention check: plugin-style commands use ./hooks/
+        try:
+            data = json.loads(hooks_json.read_text(encoding="utf-8"))
+            if layout == "convention":
+                for event, entries in (data.get("hooks") or {}).items():
+                    for entry in entries or []:
+                        command = str(entry.get("command") or "")
+                        if command and not command.startswith("./hooks/"):
+                            failures.append(f"non-conventional hook command under {event}: {command}")
+                            checks["hooks_paths"] = "FAIL"
+                checks.setdefault("hooks_paths", "PASS")
+        except json.JSONDecodeError as exc:
+            failures.append(f"hooks.json invalid: {exc}")
+            checks["hooks_json"] = "FAIL"
+
+    expected_paths = {
+        "rules": "./rules/",
+        "skills": "./skills/",
+        "agents": "./agents/",
+        "commands": "./commands/",
+        "hooks": "./hooks/hooks.json",
+        "mcpServers": "./mcp.json",
+    }
+    if layout == "convention":
+        for key, expected in expected_paths.items():
+            actual = str(manifest.get(key) or "")
+            if actual and actual != expected:
+                failures.append(f"manifest {key} should be {expected}, got {actual}")
+                checks[f"manifest_{key}"] = "FAIL"
+            else:
+                checks[f"manifest_{key}"] = "PASS"
 
     if not (root / "mcp.json").exists():
         failures.append("missing mcp.json")
@@ -157,8 +263,7 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
 
     logo = str(manifest.get("logo") or "")
     if logo:
-        logo_path = root / logo
-        if not logo_path.exists():
+        if not (root / logo).exists():
             failures.append(f"logo missing: {logo}")
             checks["logo"] = "FAIL"
         else:
@@ -166,12 +271,17 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
     else:
         checks["logo"] = "ABSENT"
 
+    checks["layout"] = layout
     return {
         "result": "PASS" if not failures else "FAIL",
         "failures": failures,
         "checks": checks,
         "counts": counts,
-        "manifest": {"name": manifest.get("name"), "version": manifest.get("version"), "displayName": manifest.get("displayName")},
+        "manifest": {
+            "name": manifest.get("name"),
+            "version": manifest.get("version"),
+            "displayName": manifest.get("displayName"),
+        },
         "validated_at": utcnow(),
         "root": str(root),
     }
@@ -186,16 +296,13 @@ def doctor_plugin(root: Path | None = None, *, repair: bool = False) -> dict[str
     if repair and issues:
         sync = sync_plugin_layout(root)
         repairs.append(f"sync_plugin_layout:{sync.get('result')}")
-        cursor = root / ".cursor"
-        cursor.mkdir(parents=True, exist_ok=True)
-        for name in CURSOR_COMPONENT_DIRS:
-            (cursor / name).mkdir(parents=True, exist_ok=True)
-            repairs.append(f"ensured .cursor/{name}")
-        mcp = root / "mcp.json"
-        if not mcp.exists():
-            write_json_atomic(mcp, {"mcpServers": {}})
+        for name in PLUGIN_COMPONENT_DIRS:
+            (root / name).mkdir(parents=True, exist_ok=True)
+            repairs.append(f"ensured {name}/")
+        if not (root / "mcp.json").exists():
+            write_json_atomic(root / "mcp.json", {"mcpServers": {}})
             repairs.append("created mcp.json")
-        commands = cursor / "commands"
+        commands = root / "commands"
         if not any(commands.glob("*.md")):
             (commands / "cle-verify.md").write_text(
                 "---\nname: cle-verify\ndescription: Verify installation\n---\n\n# Verify\n\n```bash\ncle verify\n```\n",
@@ -210,11 +317,11 @@ def doctor_plugin(root: Path | None = None, *, repair: bool = False) -> dict[str
                     "name": PLUGIN_NAME,
                     "version": read_framework_version(root),
                     "description": "Cursor Loop Engineering",
-                    "rules": "./.cursor/rules/",
-                    "skills": "./.cursor/skills/",
-                    "agents": "./.cursor/agents/",
-                    "commands": "./.cursor/commands/",
-                    "hooks": "./.cursor/hooks.json",
+                    "rules": "./rules/",
+                    "skills": "./skills/",
+                    "agents": "./agents/",
+                    "commands": "./commands/",
+                    "hooks": "./hooks/hooks.json",
                     "mcpServers": "./mcp.json",
                 },
             )
@@ -232,91 +339,56 @@ def doctor_plugin(root: Path | None = None, *, repair: bool = False) -> dict[str
 
 
 def _materialize_plugin_tree(root: Path, dest: Path) -> list[str]:
-    """Copy canonical `.cursor/` components into Cursor plugin-root layout at dest."""
+    """Install conventional plugin tree into destination (already convention-shaped)."""
     copied: list[str] = []
-    cursor = root / ".cursor"
-    mapping = {
-        "rules": "rules",
-        "skills": "skills",
-        "agents": "agents",
-        "commands": "commands",
-        "hooks": "hooks",
-        "templates": "templates",
-    }
-    for src_name, dest_name in mapping.items():
-        src = cursor / src_name
+    sync_plugin_layout(root)
+
+    for rel in (
+        ".cursor-plugin",
+        "rules",
+        "skills",
+        "agents",
+        "commands",
+        "hooks",
+        "templates",
+        "assets",
+        "mcp.json",
+        "VERSION",
+        "COMPATIBILITY.json",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "SECURITY.md",
+        "MARKETPLACE.md",
+        "docs",
+        "examples",
+    ):
+        src = root / rel
         if not src.exists():
             continue
-        target = dest / dest_name
-        if target.exists():
-            shutil.rmtree(target)
-        shutil.copytree(src, target)
-        copied.append(dest_name)
+        target = dest / rel
+        if src.is_dir():
+            if target.exists():
+                shutil.rmtree(target)
+            shutil.copytree(src, target, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, target)
+        copied.append(rel)
 
-    hooks_json = cursor / "hooks.json"
-    if hooks_json.exists():
-        data = json.loads(hooks_json.read_text(encoding="utf-8"))
-        plugin_hooks = {"version": data.get("version", 1), "hooks": {}}
-        for event, entries in (data.get("hooks") or {}).items():
-            rewritten = []
-            for entry in entries or []:
-                item = dict(entry)
-                command = str(item.get("command") or "")
-                if command:
-                    item["command"] = "./hooks/" + Path(command).name
-                rewritten.append(item)
-            plugin_hooks["hooks"][event] = rewritten
-        (dest / "hooks").mkdir(parents=True, exist_ok=True)
-        write_json_atomic(dest / "hooks" / "hooks.json", plugin_hooks)
-        copied.append("hooks/hooks.json")
-
-    # Manifest for installed plugin uses root-relative component paths
-    src_manifest = root / ".cursor-plugin" / "plugin.json"
-    (dest / ".cursor-plugin").mkdir(parents=True, exist_ok=True)
-    if src_manifest.exists():
-        data = json.loads(src_manifest.read_text(encoding="utf-8"))
-    else:
-        data = {"name": PLUGIN_NAME, "description": "Cursor Loop Engineering"}
-    data["rules"] = "./rules/"
-    data["skills"] = "./skills/"
-    data["agents"] = "./agents/"
-    data["commands"] = "./commands/"
-    data["hooks"] = "./hooks/hooks.json"
-    data["mcpServers"] = "./mcp.json"
-    data["logo"] = "assets/logo.svg"
-    data["version"] = data.get("version") or read_framework_version(root)
-    write_json_atomic(dest / ".cursor-plugin" / "plugin.json", data)
-    copied.append(".cursor-plugin")
-
-    for rel in ("mcp.json", "VERSION", "COMPATIBILITY.json", "LICENSE", "README.md", "MARKETPLACE.md", "CHANGELOG.md", "SECURITY.md"):
-        src = root / rel
-        if src.exists():
-            shutil.copy2(src, dest / rel)
-            copied.append(rel)
-
-    assets = root / "assets"
-    if assets.exists():
-        target = dest / "assets"
-        if target.exists():
-            shutil.rmtree(target)
-        shutil.copytree(assets, target)
-        copied.append("assets")
-
-    docs = root / "docs"
-    if docs.exists():
-        target = dest / "docs"
-        if target.exists():
-            shutil.rmtree(target)
-        shutil.copytree(docs, target, ignore=shutil.ignore_patterns("__pycache__"))
-        copied.append("docs")
-
-    examples = root / "examples"
-    if examples.exists():
-        target = dest / "examples"
-        if target.exists():
-            shutil.rmtree(target)
-        shutil.copytree(examples, target)
-        copied.append("examples")
+    # Ensure installed manifest uses conventional paths
+    manifest_file = dest / ".cursor-plugin" / "plugin.json"
+    if manifest_file.exists():
+        data = json.loads(manifest_file.read_text(encoding="utf-8"))
+        data["rules"] = "./rules/"
+        data["skills"] = "./skills/"
+        data["agents"] = "./agents/"
+        data["commands"] = "./commands/"
+        data["hooks"] = "./hooks/hooks.json"
+        data["mcpServers"] = "./mcp.json"
+        if (dest / "assets" / "logo.svg").exists():
+            data["logo"] = "assets/logo.svg"
+        write_json_atomic(manifest_file, data)
 
     return copied
 

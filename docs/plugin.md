@@ -1,17 +1,33 @@
 # Plugin packaging
 
-Source of truth for Cursor assets is `.cursor/`.
+This repository follows **current Cursor plugin conventions**.
 
-`.cursor-plugin/plugin.json` points at:
+## Layout
 
-- `./.cursor/rules/`
-- `./.cursor/skills/`
-- `./.cursor/agents/`
-- `./.cursor/commands/`
-- `./.cursor/hooks.json`
-- `./mcp.json`
+```text
+.cursor-plugin/plugin.json
+rules/
+skills/
+agents/
+commands/
+hooks/hooks.json
+hooks/*.py
+mcp.json
+assets/logo.svg
+```
 
-Local plugin install materializes a Cursor-compatible root layout under `~/.cursor/plugins/local/cursor-loop-engineering` (rules/skills/agents at plugin root) without keeping those mirrors in git.
+Manifest paths:
+
+- `rules`: `./rules/`
+- `skills`: `./skills/`
+- `agents`: `./agents/`
+- `commands`: `./commands/`
+- `hooks`: `./hooks/hooks.json`
+- `mcpServers`: `./mcp.json`
+
+`.cursor/` is retained as the **project-install mirror**. The installer copies conventional root components into a consumer project's `.cursor/` tree.
+
+## Commands
 
 ```bash
 cle plugin-validate --self
@@ -20,3 +36,5 @@ cle plugin-install
 cle plugin-update
 cle plugin-remove
 ```
+
+See [PLUGIN_COMPATIBILITY_REPORT.md](../PLUGIN_COMPATIBILITY_REPORT.md).

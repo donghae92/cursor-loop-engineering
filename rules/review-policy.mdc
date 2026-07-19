@@ -1,0 +1,10 @@
+---
+description: Independent review expectations
+alwaysApply: true
+---
+
+# Review policy
+
+- Defect-first review: correctness, safety, evidence gaps.
+- Call out incomplete modules and dual sources of truth.
+- Require tests for installer, runtime, and CLI behavior changes.

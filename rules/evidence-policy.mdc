@@ -1,0 +1,11 @@
+---
+description: Evidence requirements and confidence rejection
+alwaysApply: true
+---
+
+# Evidence policy
+
+- Model confidence is never evidence.
+- Accepted classes: FILE, HASH, TEST_RESULT, LOG, MANIFEST, CHECKPOINT, COMMAND_OUTPUT, SCHEMA.
+- Claims must point at durable artifacts under the project or `.cursor-loop/`.
+- Quarantine malformed derived outputs; do not silently rewrite history.

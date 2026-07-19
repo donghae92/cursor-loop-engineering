@@ -27,8 +27,10 @@ def test_sync_and_validate_plugin(framework_root: Path) -> None:
     assert result["counts"]["commands"] >= 6
     assert result["counts"]["hooks"] >= 7
     assert (framework_root / ".cursor-plugin" / "plugin.json").exists()
-    assert (framework_root / ".cursor" / "rules").exists()
+    assert (framework_root / "rules").exists()
+    assert (framework_root / "hooks" / "hooks.json").exists()
     assert (framework_root / "mcp.json").exists()
+    assert result["checks"].get("layout") == "convention"
 
 
 def test_plugin_doctor_repair(tmp_path: Path, monkeypatch) -> None:
@@ -40,30 +42,31 @@ def test_plugin_doctor_repair(tmp_path: Path, monkeypatch) -> None:
         encoding="utf-8",
     )
     (plugin / "VERSION").write_text("2.0.0\n", encoding="utf-8")
-    cursor = plugin / ".cursor"
-    (cursor / "rules").mkdir(parents=True)
-    (cursor / "rules" / "architecture.mdc").write_text(
+    # Seed conventional root dirs (minimal)
+    (plugin / "rules").mkdir(parents=True)
+    (plugin / "rules" / "architecture.mdc").write_text(
         "---\ndescription: x\nalwaysApply: true\n---\n# A\n",
         encoding="utf-8",
     )
-    (cursor / "skills" / "validation").mkdir(parents=True)
-    (cursor / "skills" / "validation" / "SKILL.md").write_text(
+    (plugin / "skills" / "validation").mkdir(parents=True)
+    (plugin / "skills" / "validation" / "SKILL.md").write_text(
         "---\nname: validation\ndescription: d\n---\n# V\n",
         encoding="utf-8",
     )
-    (cursor / "agents").mkdir(parents=True)
-    (cursor / "agents" / "ceo.md").write_text("---\nname: ceo\ndescription: d\n---\n# C\n", encoding="utf-8")
-    (cursor / "hooks").mkdir(parents=True)
-    (cursor / "hooks" / "pre_task.py").write_text("#!/usr/bin/env python3\nprint('ok')\n", encoding="utf-8")
-    (cursor / "hooks.json").write_text(
-        json.dumps({"version": 1, "hooks": {"preToolUse": [{"command": ".cursor/hooks/pre_task.py"}]}}),
+    (plugin / "agents").mkdir(parents=True)
+    (plugin / "agents" / "ceo.md").write_text("---\nname: ceo\ndescription: d\n---\n# C\n", encoding="utf-8")
+    (plugin / "hooks").mkdir(parents=True)
+    (plugin / "hooks" / "pre_task.py").write_text("#!/usr/bin/env python3\nprint('ok')\n", encoding="utf-8")
+    (plugin / "hooks" / "hooks.json").write_text(
+        json.dumps({"version": 1, "hooks": {"preToolUse": [{"command": "./hooks/pre_task.py"}]}}),
         encoding="utf-8",
     )
 
     monkeypatch.setattr("cursor_loop_install.plugin.framework_root", lambda: plugin)
     result = doctor_plugin(plugin, repair=True)
     assert (plugin / "mcp.json").exists()
-    assert (plugin / ".cursor" / "commands").exists()
+    assert (plugin / "commands").exists()
+    assert (plugin / ".cursor" / "rules").exists()
     assert result["repairs"]
 
 
@@ -78,10 +81,11 @@ def test_plugin_install_update_remove(framework_root: Path, tmp_path: Path, monk
     assert (dest / ".cursor-plugin" / "plugin.json").exists()
     assert (dest / "rules").exists()
     assert (dest / "commands").exists()
+    assert (dest / "hooks" / "hooks.json").exists()
     assert (dest / "assets" / "logo.svg").exists()
     materialized = validate_plugin(dest)
     assert materialized["result"] == "PASS", materialized.get("failures")
-    assert materialized["checks"].get("layout") == "materialized"
+    assert materialized["checks"].get("layout") == "convention"
 
     updated = update_plugin_local(framework_root)
     assert updated["result"] == "PASS"

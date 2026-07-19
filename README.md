@@ -7,16 +7,18 @@ Install merge-safe `.cursor/` assets and a durable `.cursor-loop/` runtime. Coor
 ## Repository structure
 
 ```text
-.cursor/          # Canonical Cursor assets (rules, skills, agents, hooks, commands)
-.cursor-plugin/   # Plugin manifest (plugin.json)
-assets/           # Marketplace logo and static assets
-runtime/          # Loop, scheduler, regression, evidence, memory controllers
+.cursor-plugin/   # plugin.json (Cursor plugin manifest)
+rules/            # Plugin rules (.mdc) — Cursor convention
+skills/           # Plugin skills
+agents/           # Plugin subagents
+commands/         # Slash commands
+hooks/            # hooks.json + hook scripts
+mcp.json          # MCP server config (optional servers)
+assets/           # Marketplace logo
+.cursor/          # Project-install mirror of plugin assets
+runtime/          # Loop, scheduler, regression, evidence, memory
 sdk/              # CLI + installer + migrations
-docs/             # Framework documentation
-examples/         # Generic stack install examples
-tests/            # Automated verification
-scripts/          # Entrypoints (cle, install helper)
-.github/          # CI and release workflows
+docs/ examples/ tests/ scripts/ .github/
 ```
 
 ## Quick start
@@ -72,6 +74,7 @@ Exit codes: `0` success, `3` loop stop disposition, `4` gate failure, `5` unexpe
 
 ## Documentation
 
+- [Plugin compatibility report](PLUGIN_COMPATIBILITY_REPORT.md)
 - [Release Candidate report](RELEASE_CANDIDATE.md)
 - [Release notes](RELEASE_NOTES.md)
 - [docs/README.md](docs/README.md)
