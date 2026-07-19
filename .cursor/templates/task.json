@@ -1,0 +1,8 @@
+{
+  "task_id": "T0000",
+  "mission": "",
+  "status": "READY",
+  "worker_role": "developer",
+  "dependencies": [],
+  "acceptance_criteria": []
+}
