@@ -104,14 +104,37 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
         failures.append("VERSION file missing")
         checks["version"] = "FAIL"
 
+    # Support source layout (.cursor/*) and materialized marketplace layout (root rules/skills/...).
     cursor = root / ".cursor"
+    materialized = (root / "rules").exists() or (root / "skills").exists()
+    if materialized:
+        rules_dir = root / "rules"
+        skills_dir = root / "skills"
+        agents_dir = root / "agents"
+        commands_dir = root / "commands"
+        hooks_dir = root / "hooks"
+        hooks_json = root / "hooks" / "hooks.json"
+        layout = "materialized"
+    else:
+        rules_dir = cursor / "rules"
+        skills_dir = cursor / "skills"
+        agents_dir = cursor / "agents"
+        commands_dir = cursor / "commands"
+        hooks_dir = cursor / "hooks"
+        hooks_json = cursor / "hooks.json"
+        layout = "source"
+
     counts = {
-        "rules": len(list((cursor / "rules").glob("*.mdc"))) if (cursor / "rules").exists() else 0,
-        "skills": len(list((cursor / "skills").glob("*/SKILL.md"))) if (cursor / "skills").exists() else 0,
-        "agents": len(list((cursor / "agents").glob("*.md"))) if (cursor / "agents").exists() else 0,
-        "commands": len(list((cursor / "commands").glob("*.md"))) if (cursor / "commands").exists() else 0,
-        "hooks": len(list((cursor / "hooks").glob("*.py"))) if (cursor / "hooks").exists() else 0,
+        "rules": len(list(rules_dir.glob("*.mdc"))) if rules_dir.exists() else 0,
+        "skills": len(list(skills_dir.glob("*/SKILL.md"))) if skills_dir.exists() else 0,
+        "agents": len(list(agents_dir.glob("*.md"))) if agents_dir.exists() else 0,
+        "commands": len(list(commands_dir.glob("*.md"))) if commands_dir.exists() else 0,
+        "hooks": len([p for p in hooks_dir.glob("*.py") if p.name != "_common.py"]) if hooks_dir.exists() else 0,
     }
+    # Include helper modules in hook inventory but do not require them for the minimum.
+    if hooks_dir.exists():
+        counts["hooks"] = len(list(hooks_dir.glob("*.py")))
+
     for key, minimum in (("rules", 1), ("skills", 1), ("agents", 1), ("commands", 1), ("hooks", 1)):
         if counts[key] < minimum:
             failures.append(f"insufficient {key}: {counts[key]} < {minimum}")
@@ -119,17 +142,29 @@ def validate_plugin(root: Path | None = None) -> dict[str, Any]:
         else:
             checks[key] = "PASS"
 
-    if not (cursor / "hooks.json").exists():
-        failures.append("missing .cursor/hooks.json")
+    if not hooks_json.exists():
+        failures.append("missing hooks.json" if materialized else "missing .cursor/hooks.json")
         checks["hooks_json"] = "FAIL"
     else:
         checks["hooks_json"] = "PASS"
+    checks["layout"] = layout
 
     if not (root / "mcp.json").exists():
         failures.append("missing mcp.json")
         checks["mcp"] = "FAIL"
     else:
         checks["mcp"] = "PASS"
+
+    logo = str(manifest.get("logo") or "")
+    if logo:
+        logo_path = root / logo
+        if not logo_path.exists():
+            failures.append(f"logo missing: {logo}")
+            checks["logo"] = "FAIL"
+        else:
+            checks["logo"] = "PASS"
+    else:
+        checks["logo"] = "ABSENT"
 
     return {
         "result": "PASS" if not failures else "FAIL",
@@ -248,15 +283,24 @@ def _materialize_plugin_tree(root: Path, dest: Path) -> list[str]:
     data["commands"] = "./commands/"
     data["hooks"] = "./hooks/hooks.json"
     data["mcpServers"] = "./mcp.json"
+    data["logo"] = "assets/logo.svg"
     data["version"] = data.get("version") or read_framework_version(root)
     write_json_atomic(dest / ".cursor-plugin" / "plugin.json", data)
     copied.append(".cursor-plugin")
 
-    for rel in ("mcp.json", "VERSION", "COMPATIBILITY.json", "LICENSE", "README.md", "MARKETPLACE.md"):
+    for rel in ("mcp.json", "VERSION", "COMPATIBILITY.json", "LICENSE", "README.md", "MARKETPLACE.md", "CHANGELOG.md", "SECURITY.md"):
         src = root / rel
         if src.exists():
             shutil.copy2(src, dest / rel)
             copied.append(rel)
+
+    assets = root / "assets"
+    if assets.exists():
+        target = dest / "assets"
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(assets, target)
+        copied.append("assets")
 
     docs = root / "docs"
     if docs.exists():

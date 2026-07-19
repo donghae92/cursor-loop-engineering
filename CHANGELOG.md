@@ -11,6 +11,7 @@
 - Evidence class allow-list and artifact existence checks.
 - Hook safety denials for destructive shell patterns and secret-like material.
 - Migration `1.2.0` → `2.0.0`.
+- Release Candidate artifacts: `RELEASE_CANDIDATE.md`, `RELEASE_NOTES.md`, marketplace logo.
 
 ### Changed
 
@@ -18,7 +19,8 @@
 - Plugin local install materializes root component dirs from `.cursor/` at install time only.
 - Removed committed root mirrors (`rules/`, `skills/`, `agents/`, `hooks/`, `commands/`, `templates/`).
 - Removed obsolete `scripts/generate_cursor_assets.py` dual source of truth.
-- Version status: Production/Stable.
+- Hook entries declare timeouts; SECURITY and CONTRIBUTING aligned to 2.0.x.
+- Version status: Production/Stable / Release Candidate.
 
 ### Removed
 

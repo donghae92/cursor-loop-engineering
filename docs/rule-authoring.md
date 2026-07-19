@@ -29,7 +29,7 @@ Example scoped rule (from framework `coding-standards.mdc`):
 ```yaml
 ---
 description: Coding standards for Cursor Loop Engineering Python modules
-globs: "**/{runtime,sdk,install,scripts,tests}/**/*.py"
+globs: "**/{runtime,sdk,scripts,tests}/**/*.py"
 alwaysApply: false
 ---
 ```

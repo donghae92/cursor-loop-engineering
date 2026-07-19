@@ -43,40 +43,43 @@ jobs:
         run: |
           export PYTHONPATH=sdk:runtime
           python -m cursor_loop export --output dist | tee export.json
-          echo "archive=$(python -c 'import json; print(json.load(open(\"export.json\"))[\"archive\"])')" >> "$GITHUB_OUTPUT"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          data = json.load(open("export.json", encoding="utf-8"))
+          print(f"archive={data['archive']}")
+          PY
           echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
 
       - name: Generate release notes
         run: |
-          {
-            echo "## Cursor Loop Engineering v$(cat VERSION)"
-            echo
-            echo "Reusable installation framework for any Cursor project."
-            echo
-            echo "### Install from this release"
-            echo
-            echo '```bash'
-            echo "curl -L -o cle.tar.gz <asset-url>"
-            echo "python -m cursor_loop import cle.tar.gz --target /path/to/project"
-            echo '```'
-            echo
-            echo "### Verify"
-            echo
-            echo '```bash'
-            echo "python -m cursor_loop verify --path /path/to/project"
-            echo '```'
-            if [ -f CHANGELOG.md ]; then
+          if [ -f RELEASE_NOTES.md ]; then
+            cp RELEASE_NOTES.md RELEASE_NOTES.generated.md
+          else
+            {
+              echo "## Cursor Loop Engineering v$(cat VERSION)"
               echo
-              echo "### Changelog"
+              echo "Production Cursor engineering framework and plugin."
               echo
-              sed -n '1,80p' CHANGELOG.md
-            fi
-          } > RELEASE_NOTES.md
+              echo "### Install"
+              echo
+              echo '```bash'
+              echo "python -m cursor_loop import <archive.tar.gz> --target /path/to/project"
+              echo "python -m cursor_loop verify --path /path/to/project"
+              echo '```'
+              if [ -f CHANGELOG.md ]; then
+                echo
+                echo "### Changelog"
+                echo
+                sed -n '1,80p' CHANGELOG.md
+              fi
+            } > RELEASE_NOTES.generated.md
+          fi
+          cp RELEASE_NOTES.generated.md RELEASE_NOTES.md
 
       - name: Upload assets (dry run / artifacts)
         uses: actions/upload-artifact@v4
         with:
-          name: cle-release-$(cat VERSION)
+          name: cle-release-${{ steps.export.outputs.version }}
           path: |
             dist/*
             RELEASE_NOTES.md

@@ -3,33 +3,40 @@
   "hooks": {
     "preToolUse": [
       {
-        "command": ".cursor/hooks/pre_task.py"
+        "command": ".cursor/hooks/pre_task.py",
+        "timeout": 10
       },
       {
-        "command": ".cursor/hooks/validation.py"
+        "command": ".cursor/hooks/validation.py",
+        "timeout": 10
       }
     ],
     "postToolUse": [
       {
-        "command": ".cursor/hooks/post_task.py"
+        "command": ".cursor/hooks/post_task.py",
+        "timeout": 10
       }
     ],
     "onError": [
       {
-        "command": ".cursor/hooks/failure.py"
+        "command": ".cursor/hooks/failure.py",
+        "timeout": 10
       }
     ],
     "stop": [
       {
-        "command": ".cursor/hooks/stop.py"
+        "command": ".cursor/hooks/stop.py",
+        "timeout": 5
       },
       {
-        "command": ".cursor/hooks/loop_continue.py"
+        "command": ".cursor/hooks/loop_continue.py",
+        "timeout": 5
       }
     ],
     "sessionStart": [
       {
-        "command": ".cursor/hooks/research.py"
+        "command": ".cursor/hooks/research.py",
+        "timeout": 5
       }
     ]
   }

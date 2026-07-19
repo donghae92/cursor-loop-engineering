@@ -10,7 +10,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "runtime"))
 sys.path.insert(0, str(ROOT / "sdk"))
-sys.path.insert(0, str(ROOT / "install"))
 
 from cursor_loop_install.plugin import sync_plugin_layout, validate_plugin  # noqa: E402
 

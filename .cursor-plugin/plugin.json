@@ -10,6 +10,7 @@
   "homepage": "https://github.com/donghae92/cursor-loop-engineering",
   "repository": "https://github.com/donghae92/cursor-loop-engineering",
   "license": "MIT",
+  "logo": "assets/logo.svg",
   "keywords": [
     "cursor-plugin",
     "engineering-loop",

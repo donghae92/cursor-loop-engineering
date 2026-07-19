@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cursor Loop Engineering">
+  <rect width="128" height="128" rx="24" fill="#0F172A"/>
+  <circle cx="64" cy="64" r="36" fill="none" stroke="#38BDF8" stroke-width="8"/>
+  <path d="M64 28v20M64 80v20M28 64h20M80 64h20" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="64" cy="64" r="10" fill="#38BDF8"/>
+</svg>

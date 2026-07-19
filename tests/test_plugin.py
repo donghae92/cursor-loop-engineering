@@ -78,6 +78,10 @@ def test_plugin_install_update_remove(framework_root: Path, tmp_path: Path, monk
     assert (dest / ".cursor-plugin" / "plugin.json").exists()
     assert (dest / "rules").exists()
     assert (dest / "commands").exists()
+    assert (dest / "assets" / "logo.svg").exists()
+    materialized = validate_plugin(dest)
+    assert materialized["result"] == "PASS", materialized.get("failures")
+    assert materialized["checks"].get("layout") == "materialized"
 
     updated = update_plugin_local(framework_root)
     assert updated["result"] == "PASS"

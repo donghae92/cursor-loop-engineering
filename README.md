@@ -8,6 +8,8 @@ Install merge-safe `.cursor/` assets and a durable `.cursor-loop/` runtime. Coor
 
 ```text
 .cursor/          # Canonical Cursor assets (rules, skills, agents, hooks, commands)
+.cursor-plugin/   # Plugin manifest (plugin.json)
+assets/           # Marketplace logo and static assets
 runtime/          # Loop, scheduler, regression, evidence, memory controllers
 sdk/              # CLI + installer + migrations
 docs/             # Framework documentation
@@ -56,7 +58,7 @@ cle plugin-install
 | `status [--path]` | Versions, detection, runtime, upgrade plan |
 | `update` / `repair` / `remove` | Lifecycle management |
 | `export` / `import` / `rollback` / `release` | Packaging and migrations |
-| `plugin-validate` / `plugin-install` / `plugin-update` / `plugin-remove` | Local plugin lifecycle |
+| `plugin-validate` / `plugin-doctor` / `plugin-install` / `plugin-update` / `plugin-remove` | Local plugin lifecycle |
 
 Exit codes: `0` success, `3` loop stop disposition, `4` gate failure, `5` unexpected error.
 
@@ -70,6 +72,8 @@ Exit codes: `0` success, `3` loop stop disposition, `4` gate failure, `5` unexpe
 
 ## Documentation
 
+- [Release Candidate report](RELEASE_CANDIDATE.md)
+- [Release notes](RELEASE_NOTES.md)
 - [docs/README.md](docs/README.md)
 - [Installation](docs/installation.md)
 - [Architecture](docs/architecture.md)

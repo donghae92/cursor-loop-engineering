@@ -4,16 +4,16 @@ Thank you for improving the framework. This document explains how to propose cha
 
 ## Prerequisites
 
-- Python 3.10 or newer
+- Python 3.9 or newer (3.11 recommended)
 - Git
 - A Cursor installation (for manual hook and agent validation)
 
 ## Local setup
 
 ```bash
-git clone https://github.com/your-org/cursor-loop-engineering.git
+git clone https://github.com/donghae92/cursor-loop-engineering.git
 cd cursor-loop-engineering
-pip install -e ".[dev]"  # or: pip install -e .
+pip install -e ".[dev]"
 python3 -m cursor_loop bootstrap --self
 python3 -m cursor_loop doctor
 python3 -m cursor_loop verify
@@ -31,11 +31,13 @@ pytest
 |------|----------|-------|
 | CLI commands | `sdk/cursor_loop/cli.py` | JSON stdout, explicit exit codes |
 | Install logic | `sdk/cursor_loop_install/` | Asset copy + manifest hashes |
+| Migrations | `sdk/migrations/` | Upgrade/rollback scripts |
 | Runtime controllers | `runtime/cursor_loop_runtime/` | Use atomic JSON writes |
 | Cursor rules | `.cursor/rules/*.mdc` | Front matter + policy content |
 | Skills | `.cursor/skills/<name>/SKILL.md` | Runnable commands, no placeholders |
 | Agents | `.cursor/agents/<name>.md` | Role boundaries, readonly flag |
-| Hooks | `.cursor/hooks/*.py` + `hooks.json` | Keep fast; executable bit required |
+| Hooks | `.cursor/hooks/*.py` + `.cursor/hooks.json` | Keep fast; executable bit + timeout required |
+| Plugin manifest | `.cursor-plugin/plugin.json` | Keep in sync with `VERSION` |
 | Derived state | `.cursor-loop/` only | Never commit secrets here |
 | User docs | `docs/` | Update when CLI or contracts change |
 
@@ -51,67 +53,25 @@ pytest
    pytest
    ```
 
-5. **Update docs** when CLI behavior, hooks, or runtime contracts change (see `documentation-policy` rule).
-6. **Add a CHANGELOG entry** under `[Unreleased]` for user-visible changes.
+5. **Update docs** when CLI behavior, hooks, or runtime contracts change.
+6. **Add a CHANGELOG entry** for user-visible changes (new section or update the latest version notes).
 7. **Open a pull request** using the PR template.
 
 ## Coding standards
 
-- Target Python 3.10+ syntax.
+- Target Python 3.9+ syntax compatible with CI.
 - Use `write_json_atomic` from `cursor_loop_runtime.models` for JSON persistence.
 - CLI handlers return structured JSON and meaningful exit codes (`0`, `3`, `4`, `5`).
 - Do not fabricate evidence, hashes, or test results.
 - Prefer controllers and `cle` commands over ad-hoc one-off scripts.
+- Do not redesign the frozen layout (`.cursor/`, `runtime/`, `sdk/`).
 
-## Rules for Cursor assets
+## Architecture freeze
 
-### Rules (`.mdc`)
+Canonical Cursor assets live under `.cursor/`. Local plugin install may materialize root component directories for Cursor marketplace loading. Do not reintroduce dual hand-maintained source trees.
 
-- Include YAML front matter with `description`.
-- Set `alwaysApply: true` only for cross-cutting policies.
-- Use `globs` for scoped rules (e.g., Python under `runtime/`).
+## Pull requests
 
-### Skills
-
-- Name matches directory: `.cursor/skills/<name>/SKILL.md`.
-- First lines: `name` and `description` in front matter.
-- Include real shell commands agents can run.
-
-### Agents
-
-- Define authority boundaries (read-only vs implement).
-- Reference CLI and `.cursor-loop/` paths explicitly.
-
-### Hooks
-
-- Read JSON from stdin; print JSON to stdout.
-- Finish within configured timeouts in `hooks.json`.
-- Mark scripts executable (`chmod +x`); `cle repair` fixes this automatically.
-
-## Verification expectations
-
-`cle verify` checks:
-
-- Required `.cursor/` directories and files
-- All bundled rules, skills, agents, and hooks
-- Regression and evidence controllers
-- Scheduler run
-
-A failing gate blocks `cle release`. Fix with `cle repair` or address the reported failure.
-
-## Pull request checklist
-
-- [ ] `python3 -m cursor_loop verify` passes
-- [ ] `pytest` passes (or documents why tests are N/A)
-- [ ] Docs updated for user-visible changes
-- [ ] CHANGELOG updated
-- [ ] No secrets or credentials committed
-- [ ] Hook scripts remain executable
-
-## Code of conduct
-
-Participation is governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
-
-## Questions
-
-Open a [GitHub Discussion](https://github.com/your-org/cursor-loop-engineering/discussions) or file an issue labeled `question`.
+- Keep PRs focused and reviewable.
+- Include verification evidence (`cle verify`, `pytest`) in the PR body when changing runtime or installer behavior.
+- Security-sensitive changes should reference SECURITY.md reporting channels when relevant.
