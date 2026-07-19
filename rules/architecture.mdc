@@ -1,0 +1,17 @@
+---
+description: Layered architecture boundaries for Cursor Loop Engineering
+alwaysApply: true
+---
+
+# Architecture
+
+Layers (top → bottom): Rules → Skills → Agents → Hooks → Runtime Controllers → CLI.
+
+## Boundaries
+
+- Derived runtime state is written only under `.cursor-loop/`.
+- Installable Cursor assets live only under `.cursor/`.
+- Python packages live under `runtime/` and `sdk/`.
+- Never invent product-specific or proprietary project logic in this framework.
+
+Prefer `cle` / `python3 -m cursor_loop` and runtime controllers over ad-hoc scripts.

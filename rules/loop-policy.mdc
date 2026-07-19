@@ -1,0 +1,11 @@
+---
+description: Failed-section loop, retries, and stop dispositions
+alwaysApply: true
+---
+
+# Loop policy
+
+- On gate failure: localize → repair → retest → continue or stop.
+- Identical failure fingerprint ≥ 3 → SAFE_STOP.
+- Retry budget exhausted → MANUAL_REVIEW.
+- Never continue an identical failure loop without measurable progress.

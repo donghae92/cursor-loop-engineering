@@ -1,0 +1,59 @@
+{
+  "framework": "cursor-loop-engineering",
+  "current_version": "2.0.0",
+  "status": "production",
+  "python": {
+    "minimum": "3.9",
+    "recommended": "3.11",
+    "tested": ["3.9", "3.10", "3.11", "3.12"]
+  },
+  "cursor": {
+    "assets": ".cursor/",
+    "runtime_memory": ".cursor-loop/",
+    "plugin_manifest": ".cursor-plugin/plugin.json",
+    "local_install": "~/.cursor/plugins/local/cursor-loop-engineering"
+  },
+  "layout": {
+    "canonical_assets": ".cursor/",
+    "runtime": "runtime/cursor_loop_runtime/",
+    "sdk": "sdk/cursor_loop/",
+    "installer": "sdk/cursor_loop_install/",
+    "migrations": "sdk/migrations/",
+    "docs": "docs/",
+    "examples": "examples/",
+    "tests": "tests/",
+    "scripts": "scripts/",
+    "ci": ".github/"
+  },
+  "inventory": {
+    "rules": "12+",
+    "skills": "14+",
+    "agents": "10+",
+    "commands": "6+",
+    "hooks": "7+"
+  },
+  "regression_levels": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"],
+  "matrix": [
+    {
+      "version": "2.0.0",
+      "compatible_with": ["2.0.x"],
+      "migrates_from": ["1.2.0", "1.1.0", "1.0.0"],
+      "breaking": [
+        "Canonical Cursor assets live only under .cursor/",
+        "Installer package moved to sdk/cursor_loop_install/",
+        "Migrations live under sdk/migrations/",
+        "Root rules/skills/agents/hooks mirrors removed from source tree"
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "compatible_with": ["1.2.x"],
+      "migrates_from": ["1.1.0"]
+    },
+    {
+      "version": "1.1.0",
+      "compatible_with": ["1.1.x"],
+      "migrates_from": ["1.0.0"]
+    }
+  ]
+}

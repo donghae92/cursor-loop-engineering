@@ -1,0 +1,38 @@
+{
+  "name": "cursor-loop-engineering",
+  "displayName": "Cursor Loop Engineering",
+  "version": "2.0.0",
+  "description": "Production Cursor engineering framework: rules, skills, agents, hooks, verification, regression L1–L8, and merge-safe install for any project.",
+  "author": {
+    "name": "donghae92"
+  },
+  "publisher": "donghae92",
+  "homepage": "https://github.com/donghae92/cursor-loop-engineering",
+  "repository": "https://github.com/donghae92/cursor-loop-engineering",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "cursor-plugin",
+    "engineering-loop",
+    "rules",
+    "skills",
+    "agents",
+    "hooks",
+    "verification",
+    "regression",
+    "installer"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "automation",
+    "quality",
+    "agent-loop",
+    "framework"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "commands": "./commands/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./mcp.json"
+}

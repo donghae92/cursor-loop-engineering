@@ -1,0 +1,10 @@
+---
+description: Validation gates before promotion
+alwaysApply: true
+---
+
+# Validation policy
+
+- Every component validates itself: plugin, installer, runtime controllers, hooks.
+- `cle verify` is the canonical gate; repair then retest until clean.
+- Unknown results are failures for release purposes.

@@ -1,0 +1,10 @@
+---
+description: Documentation must match shipped behavior
+alwaysApply: true
+---
+
+# Documentation policy
+
+- Docs describe only implemented behavior.
+- When behavior changes, update README, docs/, and CHANGELOG in the same change set.
+- Examples must be runnable without proprietary dependencies.

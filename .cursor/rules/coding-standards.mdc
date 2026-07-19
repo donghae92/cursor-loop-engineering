@@ -1,0 +1,12 @@
+---
+description: Coding standards for framework and installed projects
+alwaysApply: true
+---
+
+# Coding standards
+
+- Python 3.9+; prefer 3.11 for CI.
+- No placeholders, TODOs-as-implementation, or silent `pass` that hides unfinished logic.
+- Public functions return structured dicts or typed models; CLI prints JSON.
+- Do not commit secrets, credentials, or live environment files.
+- Keep changes minimal and evidence-backed.

@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build assets without creating a GitHub Release"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install pytest
+
+      - name: Test and verify
+        run: |
+          export PYTHONPATH=sdk:runtime
+          python -m cursor_loop bootstrap --self
+          python -m cursor_loop install . --force
+          pytest -q
+          python -m cursor_loop verify --path .
+
+      - name: Export release package
+        id: export
+        run: |
+          export PYTHONPATH=sdk:runtime
+          python -m cursor_loop export --output dist | tee export.json
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          data = json.load(open("export.json", encoding="utf-8"))
+          print(f"archive={data['archive']}")
+          PY
+          echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        run: |
+          if [ -f RELEASE_NOTES.md ]; then
+            cp RELEASE_NOTES.md RELEASE_NOTES.generated.md
+          else
+            {
+              echo "## Cursor Loop Engineering v$(cat VERSION)"
+              echo
+              echo "Production Cursor engineering framework and plugin."
+              echo
+              echo "### Install"
+              echo
+              echo '```bash'
+              echo "python -m cursor_loop import <archive.tar.gz> --target /path/to/project"
+              echo "python -m cursor_loop verify --path /path/to/project"
+              echo '```'
+              if [ -f CHANGELOG.md ]; then
+                echo
+                echo "### Changelog"
+                echo
+                sed -n '1,80p' CHANGELOG.md
+              fi
+            } > RELEASE_NOTES.generated.md
+          fi
+          cp RELEASE_NOTES.generated.md RELEASE_NOTES.md
+
+      - name: Upload assets (dry run / artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cle-release-${{ steps.export.outputs.version }}
+          path: |
+            dist/*
+            RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') && github.event.inputs.dry_run != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            dist/*.tar.gz
+            dist/*.sha256
+          draft: false
+          generate_release_notes: true

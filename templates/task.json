@@ -1,0 +1,38 @@
+{
+  "task_id": "T0000",
+  "mission": "Example task shape for Cursor Loop Engineering",
+  "status": "READY",
+  "worker_role": "manager",
+  "dependencies": [],
+  "acceptance_criteria": ["documented acceptance criterion"],
+  "tasks": [
+    {
+      "task_id": "T0001",
+      "mission": "Bootstrap Cursor Loop Engineering into the project",
+      "worker_role": "manager",
+      "dependencies": [],
+      "acceptance_criteria": [".cursor/rules present", ".cursor-loop runtime present"]
+    },
+    {
+      "task_id": "T0002",
+      "mission": "Verify framework installation",
+      "worker_role": "qa",
+      "dependencies": ["T0001"],
+      "acceptance_criteria": ["cle verify PASS"]
+    },
+    {
+      "task_id": "T0003",
+      "mission": "Establish regression baseline",
+      "worker_role": "regression",
+      "dependencies": ["T0002"],
+      "acceptance_criteria": ["regression history entry exists"]
+    },
+    {
+      "task_id": "T0004",
+      "mission": "Confirm evidence policy and release readiness",
+      "worker_role": "release",
+      "dependencies": ["T0003"],
+      "acceptance_criteria": ["evidence check PASS"]
+    }
+  ]
+}

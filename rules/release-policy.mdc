@@ -1,0 +1,10 @@
+---
+description: Release gates and packaging rules
+alwaysApply: true
+---
+
+# Release policy
+
+- Release only when verify PASS and regression PASS.
+- Export packages must include `.cursor/`, `runtime/`, `sdk/`, docs, and VERSION.
+- Never release while a mandatory gate is failed, unknown, or skipped.

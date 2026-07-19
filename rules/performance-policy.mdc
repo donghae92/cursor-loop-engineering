@@ -1,0 +1,10 @@
+---
+description: Performance budgets for verification loops
+alwaysApply: true
+---
+
+# Performance policy
+
+- Prefer deterministic local checks over network calls.
+- Record timings under `.cursor-loop/performance.json`.
+- Keep verify/regress loops suitable for short agent sessions.
