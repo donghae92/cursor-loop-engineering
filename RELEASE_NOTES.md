@@ -6,8 +6,9 @@
 
 ## Highlights
 
-- Production layout frozen: `.cursor/`, `runtime/`, `sdk/`, `docs/`, `examples/`, `tests/`, `scripts/`, `.github/`
-- First-class Cursor plugin packaging with local install materialization
+- Production Cursor plugin layout: root `rules/`, `skills/`, `agents/`, `commands/`, `hooks/`, plus `.cursor/` project-install mirror
+- Runtime under `runtime/`; CLI/installer under `sdk/`
+- First-class Cursor plugin packaging and local install
 - Regression levels L1–L8 fully executed (not skipped)
 - Loop localize → repair → retest with stop dispositions
 - Merge-safe project installer with backups and migrations
@@ -49,10 +50,9 @@ Migration path: `1.0.0 → 1.1.0 → 1.2.0 → 2.0.0` via `sdk/migrations/`.
 
 ## Breaking changes
 
-- Canonical Cursor assets live only under `.cursor/`
-- Installer package moved to `sdk/cursor_loop_install/`
-- Migrations moved to `sdk/migrations/`
-- Root dual mirrors of rules/skills/agents/hooks are no longer maintained in source
+- Plugin assets follow Cursor conventions at repository root (`rules/`, `skills/`, `agents/`, `commands/`, `hooks/`).
+- `.cursor/` remains the project-install mirror for consumer repositories.
+- Installer package lives under `sdk/cursor_loop_install/`; migrations under `sdk/migrations/`.
 
 ## Verification
 
