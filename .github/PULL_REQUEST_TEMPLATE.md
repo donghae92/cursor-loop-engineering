@@ -29,7 +29,3 @@ python3 -m cursor_loop bootstrap --self
 python3 -m cursor_loop verify
 pytest
 ```
-
-## Screenshots / logs
-
-<!-- Optional: verify JSON excerpt or CI output -->
